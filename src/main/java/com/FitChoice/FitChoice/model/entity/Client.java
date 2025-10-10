@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+
 
 @Data
 @NoArgsConstructor
@@ -21,6 +23,10 @@ public class Client  {
     private String name;
     private String email;
     private String phoneNumber;
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
+    private List<Membership> memberships;
+
 
 
 

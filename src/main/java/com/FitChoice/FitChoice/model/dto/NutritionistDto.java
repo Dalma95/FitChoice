@@ -7,5 +7,5 @@ public class NutritionistDto {
 
     private String name;
     private String phoneNumber;
-    private String specialization;
+    private Double pricePerMonth;
 }

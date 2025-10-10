@@ -6,6 +6,5 @@ import lombok.Data;
 public class ExtraOptionDto {
 
     private String name;
-    private String description;
     private Double price;
 }

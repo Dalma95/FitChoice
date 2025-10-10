@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,6 +21,10 @@ public class FitnessClass {
     private String name;
     private String schedule;
     private Integer capacity;
+    private Double price;
+
+    @ManyToMany(mappedBy = "enrolledClasses")
+    private Set<Membership> memberships;
 
 
 

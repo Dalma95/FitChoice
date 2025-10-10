@@ -7,6 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.List;
+import java.util.Set;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,17 +24,11 @@ public class PersonalTrainer {
 
     private String name;
     private String phoneNumber;
-    private Integer experienceYears;
+    private Double pricePerMonth;
 
     @JsonIgnore
     private String role = "TRAINER";
 
-
-
-
-
-
-
-
-
+    @OneToMany(mappedBy = "personalTrainer")
+    private List<Membership> memberships;
 }

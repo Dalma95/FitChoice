@@ -23,4 +23,8 @@ public class Payment {
     private String status;
     private String transactionId = UUID.randomUUID().toString();
     private LocalDateTime paymentDate;
+
+    @OneToOne
+    @JoinColumn(name ="membership_id" )
+    private Membership membership;
 }

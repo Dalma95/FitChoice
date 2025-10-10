@@ -7,5 +7,5 @@ public class PersonalTrainerDto {
 
     private String name;
     private String phoneNumber;
-    private Integer experienceYears;
+    private Double pricePerMonth;
 }
