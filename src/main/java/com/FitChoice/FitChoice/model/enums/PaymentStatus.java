@@ -1,5 +1,5 @@
 package com.FitChoice.FitChoice.model.enums;
 
 public enum PaymentStatus {
-    PENDING, COMPLETED, FAILED, REFUNDED
+    PENDING, COMPLETED, FAILED
 }

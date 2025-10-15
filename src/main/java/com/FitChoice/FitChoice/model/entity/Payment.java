@@ -1,5 +1,6 @@
 package com.FitChoice.FitChoice.model.entity;
 
+import com.FitChoice.FitChoice.model.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,9 +21,9 @@ public class Payment {
     private Long id;
 
     private Double amount;
-    private String status;
-    private String transactionId = UUID.randomUUID().toString();
     private LocalDateTime paymentDate;
+
+    private PaymentStatus status = PaymentStatus.PENDING;
 
     @OneToOne
     @JoinColumn(name ="membership_id" )

@@ -1,5 +1,8 @@
 package com.FitChoice.FitChoice.model.dto;
 
+import com.FitChoice.FitChoice.model.enums.MembershipStatus;
+import com.FitChoice.FitChoice.model.enums.MembershipType;
+import com.FitChoice.FitChoice.model.enums.PaymentStatus;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -8,24 +11,28 @@ import java.util.Set;
 @Data
 public class MembershipDto {
 
-    private String type;
+    private Long id;
+    private String name;
     private Double basePrice;
     private Double finalPrice;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
-    private Boolean isActive;
+    private MembershipType type = MembershipType.FULLFITNESS;
+    private MembershipStatus status = MembershipStatus.INACTIVE;
     private Boolean discountApplied;
 
-    private String userName;          // identificator unic pentru client// id-ul antrenorului (daca exista)
+    private Long clientId;
+    private String clientUserName;
+
+    private Long trainerId;
     private String trainerName;
+
+    private Long nutritionistId;
     private String nutritionistName;
 
-    private Set<String> extraOptions;
-    private Set<String> fitnessClassNames;
+    private Set<String> fitnessClasses;
 
-    private Boolean paymentStatus;    // true = platit, false = neplatit
-
-
-
-
+    private Double payAmount;
+    private LocalDateTime paymentDate;
+    private PaymentStatus paymentStatus;
 }

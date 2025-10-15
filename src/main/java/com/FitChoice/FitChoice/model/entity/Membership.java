@@ -1,5 +1,7 @@
 package com.FitChoice.FitChoice.model.entity;
 
+import com.FitChoice.FitChoice.model.enums.MembershipStatus;
+import com.FitChoice.FitChoice.model.enums.MembershipType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,25 +22,26 @@ public class Membership {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String type;
+    private String name;
+    private MembershipType type = MembershipType.FULLFITNESS;
     private Double basePrice;
     private Double finalPrice;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
-    private Boolean isActive;
+    private MembershipStatus status = MembershipStatus.INACTIVE;
     private Boolean discountApplied;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
     private Client client;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "membership_extra_options",
-            joinColumns = @JoinColumn(name= "membership_id"),
-            inverseJoinColumns = @JoinColumn(name = "extra_option_id")
-    )
-    private Set<ExtraOption> extraOptions=new HashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "trainer_id")
+    private Trainer trainer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "nutritionist_id")
+    private Nutritionist nutritionist;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -47,14 +50,6 @@ public class Membership {
             inverseJoinColumns = @JoinColumn(name = "fitness_class_id")
     )
     private Set<FitnessClass> fitnessClasses=new HashSet<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "trainer_id")
-    private PersonalTrainer personalTrainer;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "nutritionist_id")
-    private Nutritionist nutritionist;
 
     @OneToOne(mappedBy = "membership", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private Payment payment;

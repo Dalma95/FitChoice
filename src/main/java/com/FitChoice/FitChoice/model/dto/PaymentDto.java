@@ -1,5 +1,6 @@
 package com.FitChoice.FitChoice.model.dto;
 
+import com.FitChoice.FitChoice.model.enums.PaymentStatus;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 public class PaymentDto {
 
     private Double amount;
-    private String status;
     private LocalDateTime paymentDate;
+
+    private PaymentStatus status = PaymentStatus.PENDING;
 }

@@ -1,14 +1,12 @@
 package com.FitChoice.FitChoice.model.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -22,7 +20,6 @@ public class Nutritionist {
     private Long id;
 
     private String name;
-    private String phoneNumber;
     private Double pricePerMonth;
 
     @OneToMany(mappedBy = "nutritionist" )

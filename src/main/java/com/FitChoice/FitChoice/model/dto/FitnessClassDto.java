@@ -6,7 +6,7 @@ import lombok.Data;
 public class FitnessClassDto {
 
     private String name;
-    private String schedule;
     private Integer capacity;
     private Double price;
+
 }

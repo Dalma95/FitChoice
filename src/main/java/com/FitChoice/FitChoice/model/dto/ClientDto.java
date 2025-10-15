@@ -7,11 +7,8 @@ import java.util.List;
 @Data
 public class ClientDto {
 
-    private String name;
-    private String email;
-    private String phoneNumber;
     private String userName;
+    private String email;
 
-    private List<MembershipSummaryDto> memberships;
-
+    private List<String> memberships;
 }

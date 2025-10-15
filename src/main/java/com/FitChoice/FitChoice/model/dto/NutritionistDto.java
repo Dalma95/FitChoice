@@ -6,6 +6,7 @@ import lombok.Data;
 public class NutritionistDto {
 
     private String name;
-    private String phoneNumber;
     private Double pricePerMonth;
+
+
 }

@@ -20,11 +20,10 @@ public class FitnessClass {
     private Long id;
 
     private String name;
-    private String schedule;
     private Integer capacity;
     private Double price;
 
-    @ManyToMany(mappedBy = "enrolledClasses", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "fitnessClasses", fetch = FetchType.LAZY)
     private Set<Membership> memberships=new HashSet<>();
 
 
