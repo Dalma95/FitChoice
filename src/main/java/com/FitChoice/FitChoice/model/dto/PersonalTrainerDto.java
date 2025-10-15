@@ -6,6 +6,7 @@ import lombok.Data;
 public class PersonalTrainerDto {
 
     private String name;
+    private String specialization;
     private String phoneNumber;
     private Double pricePerMonth;
 }

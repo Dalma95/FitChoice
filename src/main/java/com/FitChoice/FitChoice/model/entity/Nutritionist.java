@@ -25,9 +25,6 @@ public class Nutritionist {
     private String phoneNumber;
     private Double pricePerMonth;
 
-    @JsonIgnore
-    private String role = "NUTRITIONIST";
-
     @OneToMany(mappedBy = "nutritionist" )
     private List<Membership> memberships;
 

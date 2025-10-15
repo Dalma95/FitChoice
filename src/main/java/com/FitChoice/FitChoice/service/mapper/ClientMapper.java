@@ -15,7 +15,8 @@ public class ClientMapper {
         ClientDto clientDto = new ClientDto();
         clientDto.setName(client.getName());
         clientDto.setEmail(client.getEmail());
-        clientDto.setPhoneNumber(clientDto.getPhoneNumber());
+        clientDto.setPhoneNumber(client.getPhoneNumber());
+        clientDto.setUserName(client.getUserName());
 
         if(client.getMemberships() != null){
             List<MembershipSummaryDto> memberships = client.getMemberships().stream()
@@ -39,6 +40,7 @@ public class ClientMapper {
         client.setName(clientDto.getName());
         client.setEmail(clientDto.getEmail());
         client.setPhoneNumber(clientDto.getPhoneNumber());
+        client.setUserName(clientDto.getUserName());
         return client;
     }
 }

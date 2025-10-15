@@ -23,11 +23,9 @@ public class PersonalTrainer {
     private Long id;
 
     private String name;
+    private String specialization;
     private String phoneNumber;
     private Double pricePerMonth;
-
-    @JsonIgnore
-    private String role = "TRAINER";
 
     @OneToMany(mappedBy = "personalTrainer")
     private List<Membership> memberships;

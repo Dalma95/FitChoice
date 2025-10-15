@@ -1,10 +1,9 @@
 package com.FitChoice.FitChoice.model.dto;
 
-import com.FitChoice.FitChoice.model.entity.ExtraOption;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class MembershipDto {
@@ -17,12 +16,14 @@ public class MembershipDto {
     private Boolean isActive;
     private Boolean discountApplied;
 
-    private String clientId;
+    private String userName;          // identificator unic pentru client// id-ul antrenorului (daca exista)
     private String trainerName;
     private String nutritionistName;
-    private List<ExtraOption> extraOptions;
-    private List<String> fitnessClassNames;
-    private Boolean paymentStatus;
+
+    private Set<String> extraOptions;
+    private Set<String> fitnessClassNames;
+
+    private Boolean paymentStatus;    // true = platit, false = neplatit
 
 
 

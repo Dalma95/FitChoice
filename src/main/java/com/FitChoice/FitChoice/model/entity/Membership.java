@@ -32,30 +32,30 @@ public class Membership {
     @JoinColumn(name = "client_id")
     private Client client;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "membership_plans",
+            name = "membership_extra_options",
             joinColumns = @JoinColumn(name= "membership_id"),
             inverseJoinColumns = @JoinColumn(name = "extra_option_id")
     )
     private Set<ExtraOption> extraOptions=new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "membership_plans",
+            name = "membership_fitness_classes",
             joinColumns = @JoinColumn(name ="membership_id"),
             inverseJoinColumns = @JoinColumn(name = "fitness_class_id")
     )
     private Set<FitnessClass> fitnessClasses=new HashSet<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "trainer_id")
     private PersonalTrainer personalTrainer;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "nutritionist_id")
     private Nutritionist nutritionist;
 
-    @OneToOne
+    @OneToOne(mappedBy = "membership", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private Payment payment;
 }

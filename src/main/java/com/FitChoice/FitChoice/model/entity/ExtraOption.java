@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -21,6 +22,6 @@ public class ExtraOption {
     private String name;
     private Double price;
 
-    @ManyToMany(mappedBy = "extraOptions")
-    private Set<Membership> memberships;
+    @ManyToMany(mappedBy = "extraOptions",fetch = FetchType.LAZY)
+    private Set<Membership> memberships=new HashSet<>();
 }

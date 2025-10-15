@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -23,8 +24,8 @@ public class FitnessClass {
     private Integer capacity;
     private Double price;
 
-    @ManyToMany(mappedBy = "enrolledClasses")
-    private Set<Membership> memberships;
+    @ManyToMany(mappedBy = "enrolledClasses", fetch = FetchType.LAZY)
+    private Set<Membership> memberships=new HashSet<>();
 
 
 

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import javax.sql.RowSet;
 import java.util.List;
 
 
@@ -14,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Entity
 @Table(name = "clients")
-public class Client  {
+public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,16 +24,10 @@ public class Client  {
     private String name;
     private String email;
     private String phoneNumber;
+    private String userName;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private List<Membership> memberships;
-
-
-
-
-
-
-
 
 
 }
