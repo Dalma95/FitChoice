@@ -3,6 +3,7 @@ package com.FitChoice.FitChoice.service.implementation;
 import com.FitChoice.FitChoice.model.dto.FitnessClassDto;
 import com.FitChoice.FitChoice.model.entity.FitnessClass;
 import com.FitChoice.FitChoice.repository.FitnessClassRepository;
+import com.FitChoice.FitChoice.service.interfaceses.FitnessClassService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,11 +17,7 @@ public class FitnessClassServiceImpl implements FitnessClassService {
     FitnessClassRepository fitnessClassRepo;
 
     @Override
-    public FitnessClass createFitnessClass(FitnessClassDto fitnessClassDto) {
-        FitnessClass fitnessClass = new FitnessClass();
-        fitnessClass.setName(fitnessClassDto.getName());
-        fitnessClass.setCapacity(fitnessClassDto.getCapacity());
-        fitnessClass.setPrice(fitnessClassDto.getPrice());
+    public FitnessClass createFitnessClass(FitnessClass fitnessClass) {
         return fitnessClassRepo.save(fitnessClass);
     }
 
@@ -47,6 +44,22 @@ public class FitnessClassServiceImpl implements FitnessClassService {
     public void deleteClassById(Long id) {
         fitnessClassRepo.deleteById(id);
 
+    }
+
+    public FitnessClassDto toDto(FitnessClass fitnessClass){
+        FitnessClassDto dto = new FitnessClassDto();
+        dto.setName(fitnessClass.getName());
+        dto.setCapacity(fitnessClass.getCapacity());
+        dto.setPrice(fitnessClass.getPrice());
+        return dto;
+    }
+
+    public FitnessClass toEntity(FitnessClassDto dto){
+        FitnessClass fitnessClass = new FitnessClass();
+        fitnessClass.setName(dto.getName());
+        fitnessClass.setCapacity(dto.getCapacity());
+        fitnessClass.setPrice(dto.getPrice());
+        return fitnessClass;
     }
 
 

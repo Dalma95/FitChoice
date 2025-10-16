@@ -1,61 +1,55 @@
 package com.FitChoice.FitChoice.service.implementation;
 
 import com.FitChoice.FitChoice.model.dto.ClientDto;
-import com.FitChoice.FitChoice.model.dto.MembershipDto;
 import com.FitChoice.FitChoice.model.entity.Client;
-import com.FitChoice.FitChoice.model.entity.Membership;
-import com.FitChoice.FitChoice.model.enums.MembershipType;
+import com.FitChoice.FitChoice.repository.ClientRepository;
 import com.FitChoice.FitChoice.repository.MembershipRepository;
+import com.FitChoice.FitChoice.repository.PaymentRepository;
+import com.FitChoice.FitChoice.service.interfaceses.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
-public class ClientServiceImpl implements ClientService{
+public class ClientServiceImpl implements ClientService {
 
     @Autowired
-    MembershipRepository membershipRepo;
+    ClientRepository clientRepository;
 
-   public Client toEntity (ClientDto dto){
-       Client client = new Client();
+    @Override
+    public Client createClient(Client client) {
+        return clientRepository.save(client);
+    }
 
-       client.setUserName(dto.getUserName());
-       client.setEmail(dto.getEmail());
+    @Override
+    public List<Client> findAllClients(){
+        return clientRepository.findAll();
+    }
 
-       if (dto.getMemberships() != null && !dto.getMemberships().isEmpty()){
-           List<Membership> memberships = dto.getMemberships().stream()
-                   .filter(n -> n != null && !n.isBlank())
-                   .map( name -> membershipRepo.findMembershipByName(name)
-                           .orElseGet(() -> {
-                               Membership m = new Membership();
-                               try {
-                                   m.setType(MembershipType.valueOf(name.toUpperCase()));
-                               } catch (IllegalArgumentException e) {
-                                   m.setType(MembershipType.FULLFITNESS);
-                               }
-                               return membershipRepo.save(m);
-                           }))
-                   .collect(Collectors.toList());
-           client.setMemberships(memberships);
-           memberships.forEach(m -> m.setClient(client));
-       }
-       return client;
-   }
+    @Override
+    public Optional<Client> findClientById(Long id){
+        return clientRepository.findById(id);
+    }
 
-   public ClientDto toDto (Client client){
+    @Override
+    public void deleteClientById(Long id) {
+        clientRepository.deleteById(id);
+    }
 
-       ClientDto dto = new ClientDto();
-       dto.setUserName(client.getUserName());
-       dto.setEmail(client.getEmail());
+    public Client toEntity(ClientDto dto){
+        Client client = new Client();
+        client.setUserName(dto.getUserName());
+        client.setEmail(dto.getEmail());
+        return client;
+    }
 
-       if(client.getMemberships() != null && !client.getMemberships().isEmpty()){
-          List<String> membershipsName = client.getMemberships().stream()
-                  .map(m -> m.getType() != null ? m.getType().name() : "UNKNOWN")
-                  .toList();
-          dto.setMemberships(membershipsName);
-       }
-       return dto;
-   }
+    public ClientDto toDto(Client client){
+        ClientDto dto = new ClientDto();
+        dto.setUserName(client.getUserName());
+        dto.setEmail(client.getEmail());
+        return dto;
+
+    }
 }

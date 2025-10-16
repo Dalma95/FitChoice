@@ -26,8 +26,4 @@ public class FitnessClass {
     @ManyToMany(mappedBy = "fitnessClasses", fetch = FetchType.LAZY)
     private Set<Membership> memberships=new HashSet<>();
 
-
-
-
-
 }

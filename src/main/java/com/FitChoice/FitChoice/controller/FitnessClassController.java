@@ -2,7 +2,7 @@ package com.FitChoice.FitChoice.controller;
 
 import com.FitChoice.FitChoice.model.dto.FitnessClassDto;
 import com.FitChoice.FitChoice.model.entity.FitnessClass;
-import com.FitChoice.FitChoice.service.implementation.FitnessClassService;
+import com.FitChoice.FitChoice.service.interfaceses.FitnessClassService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +19,7 @@ public class FitnessClassController {
 
     @PostMapping
     public ResponseEntity<FitnessClass> createFitnessClass(@RequestBody FitnessClassDto dto){
-        return ResponseEntity.ok(fitnessClassService.createFitnessClass(dto));
+        return ResponseEntity.ok(fitnessClassService.createFitnessClass(fitnessClassService.toEntity(dto)));
     }
 
     @GetMapping

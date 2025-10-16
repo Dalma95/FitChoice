@@ -1,13 +1,13 @@
 package com.FitChoice.FitChoice.model.entity;
 
 import com.FitChoice.FitChoice.model.enums.PaymentStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -23,9 +23,11 @@ public class Payment {
     private Double amount;
     private LocalDateTime paymentDate;
 
+
     private PaymentStatus status = PaymentStatus.PENDING;
 
-    @OneToOne
-    @JoinColumn(name ="membership_id" )
-    private Membership membership;
+    @ManyToOne
+    @JoinColumn(name = "client_id")
+    private Client client;
+
 }

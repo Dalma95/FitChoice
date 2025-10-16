@@ -23,13 +23,12 @@ public class Membership {
     private Long id;
 
     private String name;
-    private MembershipType type = MembershipType.FULLFITNESS;
-    private Double basePrice;
-    private Double finalPrice;
+    private Double price;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private MembershipType type = MembershipType.FULLFITNESS;
     private MembershipStatus status = MembershipStatus.INACTIVE;
-    private Boolean discountApplied;
+    private boolean discountApplied;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id")
@@ -51,6 +50,7 @@ public class Membership {
     )
     private Set<FitnessClass> fitnessClasses=new HashSet<>();
 
-    @OneToOne(mappedBy = "membership", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id", unique = true)
     private Payment payment;
 }

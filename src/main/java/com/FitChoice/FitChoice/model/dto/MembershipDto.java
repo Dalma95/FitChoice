@@ -13,26 +13,19 @@ public class MembershipDto {
 
     private Long id;
     private String name;
-    private Double basePrice;
-    private Double finalPrice;
+    private Double price;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
-    private MembershipType type = MembershipType.FULLFITNESS;
-    private MembershipStatus status = MembershipStatus.INACTIVE;
-    private Boolean discountApplied;
+    private MembershipType type;
+    private MembershipStatus status;
+    private boolean discountApplied;
 
-    private Long clientId;
     private String clientUserName;
-
-    private Long trainerId;
     private String trainerName;
-
-    private Long nutritionistId;
     private String nutritionistName;
-
     private Set<String> fitnessClasses;
 
-    private Double payAmount;
+    private Double finalPrice;
     private LocalDateTime paymentDate;
     private PaymentStatus paymentStatus;
 }

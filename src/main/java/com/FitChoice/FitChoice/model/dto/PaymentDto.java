@@ -8,8 +8,10 @@ import java.time.LocalDateTime;
 @Data
 public class PaymentDto {
 
+    private Long membershipId;
     private Double amount;
     private LocalDateTime paymentDate;
+    private PaymentStatus status;
 
-    private PaymentStatus status = PaymentStatus.PENDING;
+
 }
