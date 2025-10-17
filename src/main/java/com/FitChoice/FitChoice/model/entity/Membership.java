@@ -11,10 +11,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-@Getter
-@Setter
-@ToString(exclude = {"payment", "trainer", "client", "nutritionist", "fitnessClasses"})
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity

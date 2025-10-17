@@ -12,20 +12,10 @@ import java.util.List;
 
 public interface MembershipRepository extends JpaRepository<Membership, Long> {
 
-
     List<Membership> findTop3ByClientIdAndTypeOrderByEndDateDesc(Long clientId, MembershipType type);
-
-    @Query("SELECT COUNT(m) FROM Membership m " +
-            "WHERE m.client.id = :clientId " +
-            "AND m.type = :type " +
-            "AND m.endDate >= :threeMonthsAgo")
-    int countRecentMembershipsByClientAndType(
-            @Param("clientId") Long clientId,
-            @Param("type") MembershipType type,
-            @Param("threeMonthsAgo") LocalDateTime threeMonthsAgo);
 
     List<Membership> findByClientId(Long id);
 
-    int countRecentMembershipsByClient(Long id, LocalDate threeMonthsAgo);
+    int countByClient_IdAndEndDateAfter(Long clientId, LocalDate threeMonthsAgo);
 
 }

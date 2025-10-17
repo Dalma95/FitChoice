@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface MembershipService {
 
-    MembershipResponseDto createMembership(MembershipCreateDto dto);
+    MembershipDto createMembership(MembershipCreateDto dto);
 
     MembershipDto renewMembership(Long membershipId);
 
@@ -20,7 +20,7 @@ public interface MembershipService {
 
     List<MembershipDto> getMembershipsByClient(String clientUserName);
 
-    double calculateTotalPrice(Membership membership);
+//    double calculateTotalPrice(Membership membership);
 
 
 

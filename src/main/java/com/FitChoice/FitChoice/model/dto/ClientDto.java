@@ -10,4 +10,5 @@ public class ClientDto {
     private String userName;
     private String email;
 
+
 }

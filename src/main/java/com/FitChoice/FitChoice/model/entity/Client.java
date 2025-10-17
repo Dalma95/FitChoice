@@ -9,9 +9,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "clients")
 public class Client {

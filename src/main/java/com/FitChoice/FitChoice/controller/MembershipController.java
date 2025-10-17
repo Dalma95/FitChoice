@@ -22,14 +22,14 @@ public class MembershipController {
 
     @Operation(summary = "Create membership")
     @PostMapping
-    public ResponseEntity<MembershipResponseDto> createMembership(@RequestBody MembershipCreateDto dto){
+    public ResponseEntity<MembershipDto> createMembership(@RequestBody MembershipCreateDto dto){
         return ResponseEntity.ok(membershipService.createMembership(dto));
     }
 
     @Operation(summary = "Renew membership")
     @PostMapping("/renew/{id}")
-    public ResponseEntity<MembershipDto> renewMembership(@PathVariable Long membershipId){
-        return ResponseEntity.ok(membershipService.renewMembership(membershipId));
+    public ResponseEntity<MembershipDto> renewMembership(@PathVariable Long id){
+        return ResponseEntity.ok(membershipService.renewMembership(id));
     }
 
     @Operation(summary = "Update payment")
