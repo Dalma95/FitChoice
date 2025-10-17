@@ -6,26 +6,21 @@ import com.FitChoice.FitChoice.model.enums.PaymentStatus;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
-public class MembershipDto {
-
+public class MembershipResponseDto {
     private Long id;
-    private Double price;
-    private LocalDate startDate;
-    private LocalDate  endDate;
-    private MembershipType type;
-    private MembershipStatus status;
-    private boolean discountApplied;
-
     private String clientUserName;
+    private MembershipType type;
+    private double price;
+    private boolean discountApplied;
+    private MembershipStatus status; // mereu INACTIVE la creare
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private PaymentStatus paymentStatus;
+    private LocalDate paymentDate;
+    private Set<String> fitnessClasses;
     private String trainerName;
     private String nutritionistName;
-    private Set<String> fitnessClasses;
-
-    private Double finalPrice;
-    private LocalDate paymentDate;
-    private PaymentStatus paymentStatus;
 }

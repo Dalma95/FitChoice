@@ -1,15 +1,17 @@
 package com.FitChoice.FitChoice.model.entity;
 
 import com.FitChoice.FitChoice.model.enums.PaymentStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Setter
 @Getter
 @ToString(exclude = "membership")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -18,10 +20,12 @@ public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     private Double amount;
-    private LocalDateTime paymentDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate paymentDate;
 
 
     private PaymentStatus status = PaymentStatus.PENDING;

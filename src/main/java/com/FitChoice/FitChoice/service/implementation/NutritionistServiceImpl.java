@@ -44,4 +44,12 @@ public class NutritionistServiceImpl implements NutritionistService {
         nutritionist.setPricePerMonth(dto.getPricePerMonth());
         return nutritionist;
     }
+
+    @Override
+    public NutritionistDto toDto(Nutritionist nutritionist) {
+        NutritionistDto dto = new NutritionistDto();
+        dto.setName(nutritionist.getName());
+        dto.setPricePerMonth(nutritionist.getPricePerMonth());
+        return dto;
+    }
 }

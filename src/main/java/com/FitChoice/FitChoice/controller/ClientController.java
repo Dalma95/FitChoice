@@ -32,8 +32,10 @@ public class ClientController {
 
     @Operation(summary = "Find client by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Client>> findClientById(@PathVariable Long id){
-        return ResponseEntity.ok(clientService.findClientById(id));
+    public ResponseEntity<ClientDto> findClientById(@PathVariable Long id){
+        return clientService.findClientById(id)
+                .map(client -> ResponseEntity.ok(clientService.toDto(client)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Delete client by ID")

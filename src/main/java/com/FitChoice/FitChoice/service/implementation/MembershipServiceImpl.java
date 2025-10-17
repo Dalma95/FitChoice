@@ -2,6 +2,7 @@ package com.FitChoice.FitChoice.service.implementation;
 
 import com.FitChoice.FitChoice.model.dto.MembershipCreateDto;
 import com.FitChoice.FitChoice.model.dto.MembershipDto;
+import com.FitChoice.FitChoice.model.dto.MembershipResponseDto;
 import com.FitChoice.FitChoice.model.dto.PaymentDto;
 import com.FitChoice.FitChoice.model.entity.*;
 import com.FitChoice.FitChoice.model.enums.MembershipStatus;
@@ -13,6 +14,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -41,24 +43,30 @@ public class MembershipServiceImpl implements MembershipService {
     PaymentRepository paymentRepo;
 
     @Override
-    public MembershipDto createMembership(MembershipDto dto) {
-        Membership membership = new Membership();
+    public MembershipResponseDto createMembership(MembershipCreateDto dto) {
 
         Client client = clientRepo.findByUserNameIgnoreCase(dto.getClientUserName())
                 .orElseThrow(() -> new RuntimeException("Client not found."));
-        membership.setClient(client);
 
+        Membership membership = new Membership();
+        membership.setClient(client);
         membership.setType(dto.getType() != null ? dto.getType() : MembershipType.FULLFITNESS);
-        membership.setPrice(dto.getPrice() != null ? dto.getPrice() : 150);
-        membership.setStartDate(LocalDateTime.now());
-        membership.setEndDate(LocalDateTime.now().plusDays(30));
         membership.setStatus(MembershipStatus.INACTIVE);
+        membership.setStartDate(LocalDate.now());
+        membership.setEndDate(LocalDate.now().plusDays(30));
+
+        double basePrice =150.0;
+        double trainerPrice= 500.0;
+        double nutritionistPrice = 150.0;
+        double finalPrice = basePrice;
 
         switch (membership.getType()){
             case GYM_PRO :
                 Trainer trainer = trainerRepo.findAll().stream().findFirst()
                         .orElseThrow(() -> new RuntimeException("No trainers available."));
                 membership.setTrainer(trainer);
+                finalPrice+= trainerPrice;
+
                 break;
 
             case GYM_STAR:
@@ -68,6 +76,7 @@ public class MembershipServiceImpl implements MembershipService {
                         .orElseThrow(() -> new RuntimeException("No nutritionists available"));
                 membership.setTrainer(trainer1);
                 membership.setNutritionist(nutritionist);
+                finalPrice+= trainerPrice+nutritionistPrice;
                 break;
 
             case FULLFITNESS:
@@ -75,11 +84,13 @@ public class MembershipServiceImpl implements MembershipService {
                     Trainer chosenTrainer = trainerRepo.findTrainerByNameIgnoreCase(dto.getTrainerName())
                             .orElseThrow(() -> new RuntimeException("Trainer not found"));
                     membership.setTrainer(chosenTrainer);
+                    finalPrice+= chosenTrainer.getPricePerMonth();
                 }
                 if (dto.getNutritionistName() != null && !dto.getNutritionistName().isBlank()){
                     Nutritionist chosenNutritionist = nutritionistRepo.findNutritionistByNameIgnoreCase(dto.getNutritionistName())
                             .orElseThrow(() -> new RuntimeException("Nutritionist not found"));
                     membership.setNutritionist(chosenNutritionist);
+                    finalPrice+= chosenNutritionist.getPricePerMonth();
                 }
                 break;
         }
@@ -89,9 +100,16 @@ public class MembershipServiceImpl implements MembershipService {
                             .orElseThrow(() -> new RuntimeException("Class not found " + name)))
                     .collect(Collectors.toSet());
             membership.setFitnessClasses(fitnessClasses);
+
         }
 
-        double finalPrice = calculateFinalPrice(membership);
+        LocalDate threeMonthsAgo = LocalDate.now().minusDays(90);
+        int recentCount = membershipRepo.countRecentMembershipsByClient(client.getId(), threeMonthsAgo);
+        if (recentCount >= 3) {
+            membership.setDiscountApplied(true);
+            finalPrice = finalPrice * 0.85;
+        }
+
         membership.setPrice(finalPrice);
 
         Payment payment = new Payment();
@@ -99,12 +117,33 @@ public class MembershipServiceImpl implements MembershipService {
         payment.setMembership(membership);
         payment.setAmount(finalPrice);
         payment.setStatus(PaymentStatus.PENDING);
-        payment.setPaymentDate(LocalDateTime.now());
+        payment.setPaymentDate(LocalDate.now());
         membership.setPayment(payment);
 
-        Membership savedMembership = membershipRepo.save(membership);
+        Membership saved = membershipRepo.save(membership);
 
-        return toDto(savedMembership);
+        MembershipResponseDto response = new MembershipResponseDto();
+        response.setId(saved.getId());
+        response.setClientUserName(client.getUserName());
+        response.setType(saved.getType());
+        response.setPrice(saved.getPrice());
+        response.setDiscountApplied(saved.isDiscountApplied());
+        response.setStatus(MembershipStatus.INACTIVE);
+        response.setStartDate(saved.getStartDate());
+        response.setEndDate(saved.getEndDate());
+        response.setPaymentStatus(PaymentStatus.PENDING);
+        response.setPaymentDate(saved.getPayment().getPaymentDate());
+
+        if (saved.getTrainer() != null)
+            response.setTrainerName(saved.getTrainer().getName());
+        if (saved.getNutritionist() != null)
+            response.setNutritionistName(saved.getNutritionist().getName());
+        if (saved.getFitnessClasses() != null)
+            response.setFitnessClasses(saved.getFitnessClasses().stream()
+                    .map(FitnessClass::getName)
+                    .collect(Collectors.toSet()));
+
+        return response;
     }
 
 
@@ -120,24 +159,24 @@ public class MembershipServiceImpl implements MembershipService {
        newMembership.setFitnessClasses(oldMembership.getFitnessClasses());
        newMembership.setType(oldMembership.getType());
        newMembership.setPrice(oldMembership.getPrice());
-       newMembership.setStartDate(LocalDateTime.now());
-       newMembership.setEndDate(LocalDateTime.now().plusDays(30));
+       newMembership.setStartDate(LocalDate.now());
+       newMembership.setEndDate(LocalDate.now().plusDays(30));
        newMembership.setStatus(MembershipStatus.INACTIVE);
 
        double finalPrice = calculateFinalPrice(newMembership);
-       newMembership.setPrice(finalPrice);
 
        if (isEligibleForDiscount(oldMembership.getClient(), oldMembership.getType())){
            newMembership.setDiscountApplied(true);
            newMembership.setPrice(finalPrice * 0.85);
        }
+        newMembership.setPrice(finalPrice);
 
        Payment payment = new Payment();
        payment.setClient(oldMembership.getClient());
        payment.setMembership(newMembership);
        payment.setAmount(newMembership.getPrice());
        payment.setStatus(PaymentStatus.PENDING);
-       payment.setPaymentDate(LocalDateTime.now());
+       payment.setPaymentDate(LocalDate.now());
        newMembership.setPayment(payment);
 
        Membership savedNewMembership = membershipRepo.save(newMembership);
@@ -154,10 +193,14 @@ public class MembershipServiceImpl implements MembershipService {
         paymentRepo.save(payment);
 
         Membership membership = payment.getMembership();
-        if (dto.getStatus() == PaymentStatus.COMPLETED){
+        if (dto.getStatus() == PaymentStatus.COMPLETED) {
             membership.setStatus(MembershipStatus.ACTIVE);
-            membershipRepo.save(membership);
+            membership.setStartDate(LocalDate.now());
+            membership.setEndDate(LocalDate.now().plusDays(30));
+        }else {
+            membership.setStatus(MembershipStatus.INACTIVE);
         }
+        membershipRepo.save(membership);
         return toDto(membership);
     }
 
@@ -186,32 +229,26 @@ public class MembershipServiceImpl implements MembershipService {
     private double calculateFinalPrice(Membership membership) {
         double total = membership.getPrice();
 
-        if (membership.getTrainer() != null){
-            total += membership.getTrainer().getPricePerMonth();
-        }
-        if (membership.getNutritionist() != null){
-            total += membership.getNutritionist().getPricePerMonth();
-        }
-        if (membership.getFitnessClasses() != null){
+        if (membership.getTrainer() != null) total += membership.getTrainer().getPricePerMonth();
+        if (membership.getNutritionist() != null) total += membership.getNutritionist().getPricePerMonth();
+        if (membership.getFitnessClasses() != null)
             total += membership.getFitnessClasses().stream()
                     .mapToDouble(FitnessClass::getPrice)
                     .sum();
-        }
         return total;
     }
 
     private boolean isEligibleForDiscount(Client client, MembershipType type) {
         List<Membership> lastThree = membershipRepo
-                .findTopLastThreeByClientIdAndTypeOrderByEndDateDesc(client.getId(),type);
+                .findTop3ByClientIdAndTypeOrderByEndDateDesc(client.getId(),type);
         return lastThree.size() == 3 && lastThree.stream()
-                .allMatch(m -> m.getStatus() == MembershipStatus.ACTIVE); // ?? nu cred ca e ok, mai trebuie verificat!!
+                .allMatch(m -> m.getStatus() == MembershipStatus.ACTIVE);
     }
 
 
     @Override
     public Membership toEntity(MembershipDto dto){
         Membership membership = new Membership();
-        membership.setName(dto.getName());
         membership.setPrice(dto.getPrice());
         membership.setStartDate(dto.getStartDate());
         membership.setEndDate(dto.getEndDate());
@@ -272,7 +309,6 @@ public class MembershipServiceImpl implements MembershipService {
     public MembershipDto toDto (Membership membership){
         MembershipDto dto = new MembershipDto();
         dto.setId(membership.getId());
-        dto.setName(membership.getName());
         dto.setPrice(membership.getPrice());
         dto.setStartDate(membership.getStartDate());
         dto.setEndDate(membership.getEndDate());

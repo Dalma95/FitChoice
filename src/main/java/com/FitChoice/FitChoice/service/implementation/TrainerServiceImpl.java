@@ -43,4 +43,12 @@ public class TrainerServiceImpl implements TrainerService {
         trainer.setPricePerMonth(dto.getPricePerMonth());
         return trainer;
     }
+
+    @Override
+    public TrainerDto toDto(Trainer trainer) {
+        TrainerDto dto = new TrainerDto();
+        dto.setName(trainer.getName());
+        dto.setPricePerMonth(trainer.getPricePerMonth());
+        return dto;
+    }
 }

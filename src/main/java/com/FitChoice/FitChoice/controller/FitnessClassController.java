@@ -32,8 +32,10 @@ public class FitnessClassController {
 
     @Operation(summary = "Find class by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<FitnessClass>> findClassById(@PathVariable Long id){
-        return ResponseEntity.ok(fitnessClassService.findClassById(id));
+    public ResponseEntity<FitnessClassDto> findClassById(@PathVariable Long id){
+        return fitnessClassService.findClassById(id)
+                .map(fitnessClass -> ResponseEntity.ok(fitnessClassService.toDto(fitnessClass)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Update fitness class")

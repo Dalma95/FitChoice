@@ -33,8 +33,10 @@ public class NutritionistController {
 
     @Operation(summary = "Find nutritionist by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Nutritionist>> findNutritionistById(@PathVariable Long id){
-        return ResponseEntity.ok(nutritionistService.findNutritionistById(id));
+    public ResponseEntity<NutritionistDto> findNutritionistById(@PathVariable Long id){
+        return nutritionistService.findNutritionistById(id)
+                .map(nutritionist -> ResponseEntity.ok(nutritionistService.toDto(nutritionist)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Delete nutritionist by ID")

@@ -2,6 +2,7 @@ package com.FitChoice.FitChoice.service.interfaceses;
 
 import com.FitChoice.FitChoice.model.dto.MembershipCreateDto;
 import com.FitChoice.FitChoice.model.dto.MembershipDto;
+import com.FitChoice.FitChoice.model.dto.MembershipResponseDto;
 import com.FitChoice.FitChoice.model.dto.PaymentDto;
 import com.FitChoice.FitChoice.model.entity.Membership;
 
@@ -9,7 +10,7 @@ import java.util.List;
 
 public interface MembershipService {
 
-    MembershipDto createMembership(MembershipDto dto);
+    MembershipResponseDto createMembership(MembershipCreateDto dto);
 
     MembershipDto renewMembership(Long membershipId);
 

@@ -32,8 +32,10 @@ public class TrainerController {
 
     @Operation(summary = "Find trainer by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<Trainer>> findTrainerById(@PathVariable Long id){
-        return ResponseEntity.ok(trainerService.findTrainerById(id));
+    public ResponseEntity<TrainerDto> findTrainerById(@PathVariable Long id){
+        return trainerService.findTrainerById(id)
+                .map(trainer -> ResponseEntity.ok(trainerService.toDto(trainer)))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Delete trainer by ID")

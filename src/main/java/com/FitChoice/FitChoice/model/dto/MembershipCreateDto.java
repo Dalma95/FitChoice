@@ -10,7 +10,6 @@ public class MembershipCreateDto {
 
     private String clientUserName;
     private MembershipType type = MembershipType.FULLFITNESS;
-    private Double price;
     private String trainerName;
     private String nutritionistName;
     private Set<String> fitnessClasses;

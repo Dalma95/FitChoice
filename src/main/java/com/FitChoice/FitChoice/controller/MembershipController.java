@@ -2,6 +2,7 @@ package com.FitChoice.FitChoice.controller;
 
 import com.FitChoice.FitChoice.model.dto.MembershipCreateDto;
 import com.FitChoice.FitChoice.model.dto.MembershipDto;
+import com.FitChoice.FitChoice.model.dto.MembershipResponseDto;
 import com.FitChoice.FitChoice.model.dto.PaymentDto;
 import com.FitChoice.FitChoice.model.entity.Membership;
 import com.FitChoice.FitChoice.service.interfaceses.MembershipService;
@@ -21,12 +22,12 @@ public class MembershipController {
 
     @Operation(summary = "Create membership")
     @PostMapping
-    public ResponseEntity<MembershipDto> createMembership(@RequestBody MembershipDto dto){
+    public ResponseEntity<MembershipResponseDto> createMembership(@RequestBody MembershipCreateDto dto){
         return ResponseEntity.ok(membershipService.createMembership(dto));
     }
 
     @Operation(summary = "Renew membership")
-    @PostMapping("/{id}/renew")
+    @PostMapping("/renew/{id}")
     public ResponseEntity<MembershipDto> renewMembership(@PathVariable Long membershipId){
         return ResponseEntity.ok(membershipService.renewMembership(membershipId));
     }
