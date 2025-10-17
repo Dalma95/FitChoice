@@ -30,4 +30,8 @@ public class Payment {
     @JoinColumn(name = "client_id")
     private Client client;
 
+    @OneToOne
+    @JoinColumn(name = "membership_id")
+    private Membership membership;
+
 }

@@ -26,8 +26,13 @@ public class Membership {
     private Double price;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+
+    @Enumerated(EnumType.STRING)
     private MembershipType type = MembershipType.FULLFITNESS;
+
+    @Enumerated(EnumType.STRING)
     private MembershipStatus status = MembershipStatus.INACTIVE;
+
     private boolean discountApplied;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -50,7 +55,6 @@ public class Membership {
     )
     private Set<FitnessClass> fitnessClasses=new HashSet<>();
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id", unique = true)
+    @OneToOne(mappedBy = "membership", cascade = CascadeType.ALL, orphanRemoval = true)
     private Payment payment;
 }

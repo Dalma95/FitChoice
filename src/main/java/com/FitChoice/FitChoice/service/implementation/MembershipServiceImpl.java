@@ -41,7 +41,7 @@ public class MembershipServiceImpl implements MembershipService {
     PaymentRepository paymentRepo;
 
     @Override
-    public MembershipDto createMembership(MembershipCreateDto dto) {
+    public MembershipDto createMembership(MembershipDto dto) {
         Membership membership = new Membership();
 
         Client client = clientRepo.findByUserNameIgnoreCase(dto.getClientUserName())
@@ -96,37 +96,91 @@ public class MembershipServiceImpl implements MembershipService {
 
         Payment payment = new Payment();
         payment.setClient(client);
+        payment.setMembership(membership);
         payment.setAmount(finalPrice);
         payment.setStatus(PaymentStatus.PENDING);
         payment.setPaymentDate(LocalDateTime.now());
         membership.setPayment(payment);
 
-        membershipRepo.save(membership);
-        return toDto(membership);
+        Membership savedMembership = membershipRepo.save(membership);
+
+        return toDto(savedMembership);
     }
 
 
     @Override
     public MembershipDto renewMembership(Long membershipId) {
-        return null;
+       Membership oldMembership = membershipRepo.findById(membershipId)
+               .orElseThrow(() -> new RuntimeException("Membership not found"));
+
+       Membership newMembership = new Membership();
+       newMembership.setClient(oldMembership.getClient());
+       newMembership.setTrainer(oldMembership.getTrainer());
+       newMembership.setNutritionist(oldMembership.getNutritionist());
+       newMembership.setFitnessClasses(oldMembership.getFitnessClasses());
+       newMembership.setType(oldMembership.getType());
+       newMembership.setPrice(oldMembership.getPrice());
+       newMembership.setStartDate(LocalDateTime.now());
+       newMembership.setEndDate(LocalDateTime.now().plusDays(30));
+       newMembership.setStatus(MembershipStatus.INACTIVE);
+
+       double finalPrice = calculateFinalPrice(newMembership);
+       newMembership.setPrice(finalPrice);
+
+       if (isEligibleForDiscount(oldMembership.getClient(), oldMembership.getType())){
+           newMembership.setDiscountApplied(true);
+           newMembership.setPrice(finalPrice * 0.85);
+       }
+
+       Payment payment = new Payment();
+       payment.setClient(oldMembership.getClient());
+       payment.setMembership(newMembership);
+       payment.setAmount(newMembership.getPrice());
+       payment.setStatus(PaymentStatus.PENDING);
+       payment.setPaymentDate(LocalDateTime.now());
+       newMembership.setPayment(payment);
+
+       Membership savedNewMembership = membershipRepo.save(newMembership);
+       return toDto(savedNewMembership);
     }
 
     @Override
     public MembershipDto updatePayment(PaymentDto dto) {
-        return null;
+        Payment payment = paymentRepo.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        payment.setStatus(dto.getStatus());
+        payment.setPaymentDate(dto.getPaymentDate());
+        paymentRepo.save(payment);
+
+        Membership membership = payment.getMembership();
+        if (dto.getStatus() == PaymentStatus.COMPLETED){
+            membership.setStatus(MembershipStatus.ACTIVE);
+            membershipRepo.save(membership);
+        }
+        return toDto(membership);
     }
 
     @Override
     public MembershipDto getMembershipById(Long id) {
-        return null;
+        Membership membership = membershipRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Membership not found"));
+        return toDto(membership);
     }
 
     @Override
     public List<MembershipDto> getMembershipsByClient(String clientUserName) {
-        return List.of();
+        Client client = clientRepo.findByUserNameIgnoreCase(clientUserName)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+        return membershipRepo.findByClientId(client.getId()).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
-
+    @Override
+    public double calculateTotalPrice(Membership membership){
+        return calculateFinalPrice(membership);
+    }
 
 
     private double calculateFinalPrice(Membership membership) {
@@ -146,7 +200,12 @@ public class MembershipServiceImpl implements MembershipService {
         return total;
     }
 
-
+    private boolean isEligibleForDiscount(Client client, MembershipType type) {
+        List<Membership> lastThree = membershipRepo
+                .findTopLastThreeByClientIdAndTypeOrderByEndDateDesc(client.getId(),type);
+        return lastThree.size() == 3 && lastThree.stream()
+                .allMatch(m -> m.getStatus() == MembershipStatus.ACTIVE); // ?? nu cred ca e ok, mai trebuie verificat!!
+    }
 
 
     @Override
