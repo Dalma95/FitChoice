@@ -37,7 +37,7 @@ public class FitnessClassServiceImpl implements FitnessClassService {
         fitnessClassFound.setName(fitnessClass.getName());
         fitnessClassFound.setCapacity(fitnessClass.getCapacity());
         fitnessClassFound.setPrice(fitnessClass.getPrice());
-        return fitnessClassRepo.save(fitnessClass);
+        return fitnessClassRepo.save(fitnessClassFound);
     }
 
     @Override

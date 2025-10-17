@@ -38,6 +38,7 @@ public class ClientServiceImpl implements ClientService {
         clientRepository.deleteById(id);
     }
 
+    @Override
     public Client toEntity(ClientDto dto){
         Client client = new Client();
         client.setUserName(dto.getUserName());

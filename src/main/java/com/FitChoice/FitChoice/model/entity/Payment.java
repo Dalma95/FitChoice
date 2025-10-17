@@ -3,13 +3,13 @@ package com.FitChoice.FitChoice.model.entity;
 import com.FitChoice.FitChoice.model.enums.PaymentStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Setter
+@Getter
+@ToString(exclude = "membership")
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -28,10 +28,12 @@ public class Payment {
 
     @ManyToOne
     @JoinColumn(name = "client_id")
+    @JsonIgnore
     private Client client;
 
     @OneToOne
     @JoinColumn(name = "membership_id")
+    @JsonIgnore
     private Membership membership;
 
 }
