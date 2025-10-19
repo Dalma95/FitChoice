@@ -2,7 +2,6 @@ package com.FitChoice.FitChoice.service.interfaceses;
 
 import com.FitChoice.FitChoice.model.dto.MembershipCreateDto;
 import com.FitChoice.FitChoice.model.dto.MembershipDto;
-import com.FitChoice.FitChoice.model.dto.MembershipResponseDto;
 import com.FitChoice.FitChoice.model.dto.PaymentDto;
 import com.FitChoice.FitChoice.model.entity.Membership;
 
@@ -20,9 +19,9 @@ public interface MembershipService {
 
     List<MembershipDto> getMembershipsByClient(String clientUserName);
 
-//    double calculateTotalPrice(Membership membership);
+    void deleteByMembershipIdAndClientUserName(Long id, String clientUserName );
 
-
+    void deleteAllMembershipsByClientId(Long id);
 
     Membership toEntity(MembershipDto membershipDto);
 

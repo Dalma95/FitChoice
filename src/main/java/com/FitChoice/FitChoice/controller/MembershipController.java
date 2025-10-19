@@ -2,9 +2,7 @@ package com.FitChoice.FitChoice.controller;
 
 import com.FitChoice.FitChoice.model.dto.MembershipCreateDto;
 import com.FitChoice.FitChoice.model.dto.MembershipDto;
-import com.FitChoice.FitChoice.model.dto.MembershipResponseDto;
 import com.FitChoice.FitChoice.model.dto.PaymentDto;
-import com.FitChoice.FitChoice.model.entity.Membership;
 import com.FitChoice.FitChoice.service.interfaceses.MembershipService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +46,18 @@ public class MembershipController {
     @GetMapping("/client/{username}")
     public ResponseEntity<List<MembershipDto>> getMembershipByClient(@PathVariable String username){
         return ResponseEntity.ok(membershipService.getMembershipsByClient(username));
+    }
+
+    @Operation(summary = "Delete all memberships for one user")
+    @DeleteMapping({"/client/{id}"})
+    public ResponseEntity<Void> deleteAllMembershipsByClientId(@PathVariable Long id){
+        membershipService.deleteAllMembershipsByClientId(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{membershipId}/{username}")
+    public ResponseEntity<Void> deleteByMembershipIdAndClientUserName(@PathVariable Long membershipId, @PathVariable String username){
+        membershipService.deleteByMembershipIdAndClientUserName(membershipId,username);
+        return ResponseEntity.noContent().build();
     }
 }

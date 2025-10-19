@@ -2,7 +2,6 @@ package com.FitChoice.FitChoice.service.implementation;
 
 import com.FitChoice.FitChoice.model.dto.MembershipCreateDto;
 import com.FitChoice.FitChoice.model.dto.MembershipDto;
-import com.FitChoice.FitChoice.model.dto.MembershipResponseDto;
 import com.FitChoice.FitChoice.model.dto.PaymentDto;
 import com.FitChoice.FitChoice.model.entity.*;
 import com.FitChoice.FitChoice.model.enums.MembershipStatus;
@@ -111,10 +110,11 @@ public class MembershipServiceImpl implements MembershipService {
         }
 
         LocalDate threeMonthsAgo = LocalDate.now().minusMonths(3);
-        int recentCount = membershipRepo.countByClient_IdAndEndDateAfter(client.getId(), threeMonthsAgo);
-        if (recentCount >= 3) {
+        if (isEligibleForDiscount(client, membership.getType())) {
             membership.setDiscountApplied(true);
-            finalPrice = finalPrice * 0.85;
+            finalPrice *= 0.85; // reducere 15%
+        } else {
+            membership.setDiscountApplied(false);
         }
 
         membership.setPrice(finalPrice);
@@ -155,10 +155,9 @@ public class MembershipServiceImpl implements MembershipService {
 
         if (isEligibleForDiscount(oldMembership.getClient(), oldMembership.getType())) {
             newMembership.setDiscountApplied(true);
-            newMembership.setPrice(finalPrice * 0.85);
+            finalPrice *= 0.85;
         } else {
             newMembership.setDiscountApplied(false);
-            newMembership.setPrice(finalPrice);
         }
         newMembership.setPrice(finalPrice);
 
@@ -211,6 +210,29 @@ public class MembershipServiceImpl implements MembershipService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public void deleteByMembershipIdAndClientUserName(Long id, String clientUserName) {
+        Client client = clientRepo.findByUserNameIgnoreCase(clientUserName)
+                .orElseThrow(() -> new RuntimeException("Client not found with username: " + clientUserName));
+
+        Membership membership = membershipRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Membership not found with id: " + id));
+
+        if (!membership.getClient().getId().equals(client.getId())) {
+            throw new RuntimeException("This membership does not belong to user: " + clientUserName);
+        }
+
+        membershipRepo.delete(membership);
+
+    }
+
+    @Override
+    public void deleteAllMembershipsByClientId(Long id) {
+        Client client = clientRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
+        membershipRepo.deleteAllMembershipsByClientId(id);
+    }
+
 //    @Override
 //    public double calculateTotalPrice(Membership membership){
 //        return calculateFinalPrice(membership);
@@ -230,14 +252,25 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     private boolean isEligibleForDiscount(Client client, MembershipType type) {
-        List<Membership> lastThreeSameType = membershipRepo
-                .findTop3ByClientIdAndTypeOrderByEndDateDesc(client.getId(), type);
+        List<Membership> memberships = membershipRepo.findByClientIdOrderByEndDateDesc(client.getId());
 
-        return lastThreeSameType.size() == 3 &&
-                lastThreeSameType.stream()
-                        .allMatch(m -> m.getPayment() != null &&
-                                m.getPayment().getStatus() == PaymentStatus.COMPLETED);}
+        int consecutivePaidSameType = 0;
 
+        for (Membership m : memberships) {
+            if (m.getType() == type &&
+                    m.getPayment() != null &&
+                    m.getPayment().getStatus() == PaymentStatus.COMPLETED) {
+                consecutivePaidSameType++;
+                if (consecutivePaidSameType == 3) {
+                    return true; // discount aplicabil doar pentru următorul abonament
+                }
+            } else {
+                consecutivePaidSameType = 0; // reset dacă tip diferit sau neplătit
+            }
+        }
+
+        return false; // nu există 3 consecutive plătite
+    }
 
     @Override
     public Membership toEntity(MembershipDto dto){
@@ -288,8 +321,9 @@ public class MembershipServiceImpl implements MembershipService {
                     ).collect(Collectors.toSet());
             membership.setFitnessClasses(fitnessClasses);
         }
-        if(dto.getFinalPrice() != null || dto.getPaymentDate() != null || dto.getPaymentStatus() != null){
+        if(dto.getFinalPrice() != null && dto.getPaymentDate() != null && dto.getPaymentStatus() != null){
             Payment payment = new Payment();
+            payment.setClient(membership.getClient());
             payment.setAmount(dto.getFinalPrice());
             payment.setPaymentDate(dto.getPaymentDate());
             payment.setStatus(dto.getPaymentStatus());
@@ -306,7 +340,7 @@ public class MembershipServiceImpl implements MembershipService {
         dto.setStartDate(membership.getStartDate());
         dto.setEndDate(membership.getEndDate());
         dto.setType(membership.getType());
-        dto.setStatus(dto.getStatus());
+        dto.setStatus(membership.getStatus());
         dto.setDiscountApplied(membership.isDiscountApplied());
 
         if(membership.getClient() != null){
