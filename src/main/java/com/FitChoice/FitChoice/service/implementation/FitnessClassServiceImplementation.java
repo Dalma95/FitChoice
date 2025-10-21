@@ -11,38 +11,38 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class FitnessClassServiceImpl implements FitnessClassService {
+public class FitnessClassServiceImplementation implements FitnessClassService {
 
     @Autowired
-    FitnessClassRepository fitnessClassRepo;
+    FitnessClassRepository fitnessClassRepository;
 
     @Override
     public FitnessClass createFitnessClass(FitnessClass fitnessClass) {
-        return fitnessClassRepo.save(fitnessClass);
+        return fitnessClassRepository.save(fitnessClass);
     }
 
     @Override
     public List<FitnessClass> findAllFitnessClasses() {
-        return fitnessClassRepo.findAll();
+        return fitnessClassRepository.findAll();
     }
 
     @Override
     public Optional<FitnessClass> findClassById(Long id) {
-        return fitnessClassRepo.findById(id);
+        return fitnessClassRepository.findById(id);
     }
 
     @Override
     public FitnessClass updateFitnessClass(Long id, FitnessClass fitnessClass) {
-        FitnessClass fitnessClassFound = fitnessClassRepo.findById(id).orElseThrow(() -> new RuntimeException("Class not found" + id));
+        FitnessClass fitnessClassFound = fitnessClassRepository.findById(id).orElseThrow(() -> new RuntimeException("Class not found" + id));
         fitnessClassFound.setName(fitnessClass.getName());
         fitnessClassFound.setCapacity(fitnessClass.getCapacity());
         fitnessClassFound.setPrice(fitnessClass.getPrice());
-        return fitnessClassRepo.save(fitnessClassFound);
+        return fitnessClassRepository.save(fitnessClassFound);
     }
 
     @Override
     public void deleteClassById(Long id) {
-        fitnessClassRepo.deleteById(id);
+        fitnessClassRepository.deleteById(id);
 
     }
 

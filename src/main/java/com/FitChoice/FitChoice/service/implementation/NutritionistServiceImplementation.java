@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class NutritionistServiceImpl implements NutritionistService {
+public class NutritionistServiceImplementation implements NutritionistService {
 
     @Autowired
     NutritionistRepository nutritionistRepository;

@@ -19,30 +19,30 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class MembershipServiceImpl implements MembershipService {
+public class MembershipServiceImplementation implements MembershipService {
 
     @Autowired
-    ClientRepository clientRepo;
+    ClientRepository clientRepository;
 
     @Autowired
-    TrainerRepository trainerRepo;
+    TrainerRepository trainerRepository;
 
     @Autowired
-    NutritionistRepository nutritionistRepo;
+    NutritionistRepository nutritionistRepository;
 
     @Autowired
-    FitnessClassRepository fitnessClassRepo;
+    FitnessClassRepository fitnessClassRepository;
 
     @Autowired
-    MembershipRepository membershipRepo;
+    MembershipRepository membershipRepository;
 
     @Autowired
-    PaymentRepository paymentRepo;
+    PaymentRepository paymentRepository;
 
     @Override
     public MembershipDto createMembership(MembershipCreateDto dto) {
 
-        Client client = clientRepo.findByUserNameIgnoreCase(dto.getClientUserName())
+        Client client = clientRepository.findByUserNameIgnoreCase(dto.getClientUserName())
                 .orElseThrow(() -> new RuntimeException("Client not found."));
 
         Membership membership = new Membership();
@@ -59,16 +59,16 @@ public class MembershipServiceImpl implements MembershipService {
 
         switch (membership.getType()){
             case GYM_PRO :
-                Trainer trainer = trainerRepo.findAll().stream().findFirst()
+                Trainer trainer = trainerRepository.findAll().stream().findFirst()
                         .orElseThrow(() -> new RuntimeException("No trainers available."));
                 membership.setTrainer(trainer);
                 finalPrice += trainerPrice;
                 break;
 
             case GYM_STAR:
-                Trainer trainer1 = trainerRepo.findAll().stream().findFirst()
+                Trainer trainer1 = trainerRepository.findAll().stream().findFirst()
                         .orElseThrow(() -> new RuntimeException("No trainers available."));
-                Nutritionist nutritionist = nutritionistRepo.findAll().stream().findFirst()
+                Nutritionist nutritionist = nutritionistRepository.findAll().stream().findFirst()
                         .orElseThrow(() -> new RuntimeException("No nutritionists available"));
                 membership.setTrainer(trainer1);
                 membership.setNutritionist(nutritionist);
@@ -77,14 +77,14 @@ public class MembershipServiceImpl implements MembershipService {
 
             case FULLFITNESS:
                 if (dto.getTrainerName() != null && !dto.getTrainerName().isBlank()){
-                    Trainer chosenTrainer = trainerRepo.findTrainerByNameIgnoreCase(dto.getTrainerName())
+                    Trainer chosenTrainer = trainerRepository.findTrainerByNameIgnoreCase(dto.getTrainerName())
                             .orElseThrow(() -> new RuntimeException("Trainer not found"));
                     finalPrice+= chosenTrainer.getPricePerMonth();
                     membership.setTrainer(chosenTrainer);
 
                 }
                 if (dto.getNutritionistName() != null && !dto.getNutritionistName().isBlank()){
-                    Nutritionist chosenNutritionist = nutritionistRepo.findNutritionistByNameIgnoreCase(dto.getNutritionistName())
+                    Nutritionist chosenNutritionist = nutritionistRepository.findNutritionistByNameIgnoreCase(dto.getNutritionistName())
                             .orElseThrow(() -> new RuntimeException("Nutritionist not found"));
                     finalPrice+= chosenNutritionist.getPricePerMonth();
                     membership.setNutritionist(chosenNutritionist);
@@ -94,7 +94,7 @@ public class MembershipServiceImpl implements MembershipService {
         }
         if (dto.getFitnessClasses() != null && !dto.getFitnessClasses().isEmpty()){
             Set<FitnessClass> fitnessClasses = dto.getFitnessClasses().stream()
-                    .map(name -> fitnessClassRepo.findFitnessClassByNameIgnoreCase(name)
+                    .map(name -> fitnessClassRepository.findFitnessClassByNameIgnoreCase(name)
                             .orElseThrow(() -> new RuntimeException("Class not found ")))
                     .collect(Collectors.toSet());
             membership.setFitnessClasses(fitnessClasses);
@@ -127,7 +127,7 @@ public class MembershipServiceImpl implements MembershipService {
         payment.setPaymentDate(LocalDate.now());
         membership.setPayment(payment);
 
-        Membership savedMembership = membershipRepo.save(membership);
+        Membership savedMembership = membershipRepository.save(membership);
 
         return toDto(savedMembership);
     }
@@ -135,7 +135,7 @@ public class MembershipServiceImpl implements MembershipService {
 
     @Override
     public MembershipDto renewMembership(Long membershipId) {
-       Membership oldMembership = membershipRepo.findById(membershipId)
+       Membership oldMembership = membershipRepository.findById(membershipId)
                .orElseThrow(() -> new RuntimeException("Membership not found"));
 
        Membership newMembership = new Membership();
@@ -169,18 +169,18 @@ public class MembershipServiceImpl implements MembershipService {
        payment.setPaymentDate(LocalDate.now());
        newMembership.setPayment(payment);
 
-       Membership savedNewMembership = membershipRepo.save(newMembership);
+       Membership savedNewMembership = membershipRepository.save(newMembership);
        return toDto(savedNewMembership);
     }
 
     @Override
     public MembershipDto updatePayment(PaymentDto dto) {
-        Payment payment = paymentRepo.findById(dto.getId())
+        Payment payment = paymentRepository.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
 
         payment.setStatus(dto.getStatus());
         payment.setPaymentDate(dto.getPaymentDate());
-        paymentRepo.save(payment);
+        paymentRepository.save(payment);
 
         Membership membership = payment.getMembership();
         if (dto.getStatus() == PaymentStatus.COMPLETED) {
@@ -190,47 +190,47 @@ public class MembershipServiceImpl implements MembershipService {
         }else {
             membership.setStatus(MembershipStatus.INACTIVE);
         }
-        membershipRepo.save(membership);
+        membershipRepository.save(membership);
         return toDto(membership);
     }
 
     @Override
     public MembershipDto getMembershipById(Long id) {
-        Membership membership = membershipRepo.findById(id)
+        Membership membership = membershipRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Membership not found"));
         return toDto(membership);
     }
 
     @Override
     public List<MembershipDto> getMembershipsByClient(String clientUserName) {
-        Client client = clientRepo.findByUserNameIgnoreCase(clientUserName)
+        Client client = clientRepository.findByUserNameIgnoreCase(clientUserName)
                 .orElseThrow(() -> new RuntimeException("Client not found"));
-        return membershipRepo.findByClientId(client.getId()).stream()
+        return membershipRepository.findByClientId(client.getId()).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public void deleteByMembershipIdAndClientUserName(Long id, String clientUserName) {
-        Client client = clientRepo.findByUserNameIgnoreCase(clientUserName)
+        Client client = clientRepository.findByUserNameIgnoreCase(clientUserName)
                 .orElseThrow(() -> new RuntimeException("Client not found with username: " + clientUserName));
 
-        Membership membership = membershipRepo.findById(id)
+        Membership membership = membershipRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Membership not found with id: " + id));
 
         if (!membership.getClient().getId().equals(client.getId())) {
             throw new RuntimeException("This membership does not belong to user: " + clientUserName);
         }
 
-        membershipRepo.delete(membership);
+        membershipRepository.delete(membership);
 
     }
 
     @Override
     public void deleteAllMembershipsByClientId(Long id) {
-        Client client = clientRepo.findById(id)
+        Client client = clientRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Client not found"));
-        membershipRepo.deleteAllMembershipsByClientId(id);
+        membershipRepository.deleteAllMembershipsByClientId(id);
     }
 
 //    @Override
@@ -252,7 +252,7 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     private boolean isEligibleForDiscount(Client client, MembershipType type) {
-        List<Membership> memberships = membershipRepo.findByClientIdOrderByEndDateDesc(client.getId());
+        List<Membership> memberships = membershipRepository.findByClientIdOrderByEndDateDesc(client.getId());
 
         int consecutivePaidSameType = 0;
 
@@ -283,40 +283,40 @@ public class MembershipServiceImpl implements MembershipService {
         membership.setDiscountApplied(dto.isDiscountApplied());
 
         if(dto.getClientUserName() != null && !dto.getClientUserName().isBlank()){
-            Client client = clientRepo.findByUserNameIgnoreCase(dto.getClientUserName())
+            Client client = clientRepository.findByUserNameIgnoreCase(dto.getClientUserName())
                     .orElseGet(() -> {
                         Client c = new Client();
                         c.setUserName(dto.getClientUserName());
-                        return clientRepo.save(c);
+                        return clientRepository.save(c);
                     });
             membership.setClient(client);
         }
         if(dto.getTrainerName() != null && !dto.getTrainerName().isBlank()){
-            Trainer trainer = trainerRepo.findTrainerByNameIgnoreCase(dto.getTrainerName())
+            Trainer trainer = trainerRepository.findTrainerByNameIgnoreCase(dto.getTrainerName())
                     .orElseGet(() ->{
                         Trainer t = new Trainer();
                         t.setName(dto.getTrainerName());
-                        return trainerRepo.save(t);
+                        return trainerRepository.save(t);
                     });
             membership.setTrainer(trainer);
         }
         if(dto.getNutritionistName() != null && !dto.getNutritionistName().isBlank()){
-            Nutritionist nutritionist = nutritionistRepo.findNutritionistByNameIgnoreCase(dto.getNutritionistName())
+            Nutritionist nutritionist = nutritionistRepository.findNutritionistByNameIgnoreCase(dto.getNutritionistName())
                     .orElseGet(() ->{
                         Nutritionist n = new Nutritionist();
                         n.setName(dto.getNutritionistName());
-                        return nutritionistRepo.save(n);
+                        return nutritionistRepository.save(n);
                     });
             membership.setNutritionist(nutritionist);
         }
         if (dto.getFitnessClasses() != null && !dto.getFitnessClasses().isEmpty()){
             Set<FitnessClass> fitnessClasses = dto.getFitnessClasses().stream()
                     .filter(n -> n!= null && !n.isBlank())
-                    .map(name -> fitnessClassRepo.findFitnessClassByNameIgnoreCase(name)
+                    .map(name -> fitnessClassRepository.findFitnessClassByNameIgnoreCase(name)
                             .orElseGet(() ->{
                                 FitnessClass f = new FitnessClass();
                                 f.setName(name);
-                                return fitnessClassRepo.save(f);
+                                return fitnessClassRepository.save(f);
                             })
                     ).collect(Collectors.toSet());
             membership.setFitnessClasses(fitnessClasses);
@@ -329,7 +329,7 @@ public class MembershipServiceImpl implements MembershipService {
             payment.setStatus(dto.getPaymentStatus());
             membership.setPayment(payment);
         }
-        return membershipRepo.save(membership);
+        return membershipRepository.save(membership);
     }
 
     @Override

@@ -4,7 +4,6 @@ import com.FitChoice.FitChoice.model.dto.ClientCreateDto;
 import com.FitChoice.FitChoice.model.dto.ClientResponseDto;
 import com.FitChoice.FitChoice.model.entity.Client;
 import com.FitChoice.FitChoice.repository.ClientRepository;
-import com.FitChoice.FitChoice.repository.MembershipRepository;
 import com.FitChoice.FitChoice.service.interfaceses.ClientService;
 import com.FitChoice.FitChoice.service.interfaceses.MembershipService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class ClientServiceImpl implements ClientService {
+public class ClientServiceImplementation implements ClientService {
 
     @Autowired
     ClientRepository clientRepository;

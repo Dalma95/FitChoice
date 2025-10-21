@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class TrainerServiceImpl implements TrainerService {
+public class TrainerServiceImplementation implements TrainerService {
 
     @Autowired
     TrainerRepository trainerRepository;
