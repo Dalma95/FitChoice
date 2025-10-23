@@ -16,6 +16,8 @@ public interface TrainerService {
 
     void deleteTrainerById(Long id);
 
+    Trainer updateTrainer(Long id, Trainer trainer);
+
     Trainer toEntity (TrainerDto dto);
 
     TrainerDto toDto(Trainer trainer);

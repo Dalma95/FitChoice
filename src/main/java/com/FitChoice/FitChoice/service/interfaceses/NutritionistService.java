@@ -14,6 +14,8 @@ public interface NutritionistService {
 
     Optional<Nutritionist> findNutritionistById(Long id);
 
+    Nutritionist updateNutritionist(Long id, Nutritionist nutritionist);
+
     void deleteNutritionistById(Long id);
 
     Nutritionist toEntity(NutritionistDto dto);

@@ -1,6 +1,6 @@
 package com.FitChoice.FitChoice.controller;
 
-import com.FitChoice.FitChoice.model.dto.ClientCreateDto;
+import com.FitChoice.FitChoice.model.dto.ClientDto;
 import com.FitChoice.FitChoice.model.dto.ClientResponseDto;
 import com.FitChoice.FitChoice.model.entity.Client;
 import com.FitChoice.FitChoice.service.interfaceses.ClientService;
@@ -21,7 +21,7 @@ public class ClientController {
 
     @Operation(summary = "Create client")
     @PostMapping
-    public ResponseEntity<Client> createClient(@RequestBody ClientCreateDto dto){
+    public ResponseEntity<Client> createClient(@RequestBody ClientDto dto){
         return ResponseEntity.ok(clientService.createClient(clientService.toEntity(dto)));
     }
 
@@ -38,11 +38,18 @@ public class ClientController {
 
     @Operation(summary = "Find client by ID")
     @GetMapping("/{id}")
-    public ResponseEntity<ClientCreateDto> findClientById(@PathVariable Long id){
+    public ResponseEntity<ClientDto> findClientById(@PathVariable Long id){
         return clientService.findClientById(id)
                 .map(client -> ResponseEntity.ok(clientService.toDto(client)))
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    @Operation(summary = "Update client")
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Client> updateClient(@PathVariable Long id, @RequestBody ClientDto dto){
+        return ResponseEntity.ok(clientService.updateClient(id,clientService.toEntity(dto)));
+    }
+
 
     @Operation(summary = "Delete client by ID")
     @DeleteMapping("/{id}")

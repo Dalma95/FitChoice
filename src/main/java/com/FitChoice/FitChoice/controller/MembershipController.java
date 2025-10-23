@@ -48,6 +48,12 @@ public class MembershipController {
         return ResponseEntity.ok(membershipService.getMembershipsByClient(username));
     }
 
+    @Operation(summary = "Update membership (type, trainer, nutritionist or fitness classes")
+    @PutMapping("/{username}/{membershipId}")
+    public ResponseEntity<MembershipDto> updateMembership(@PathVariable String username, @PathVariable Long membershipId, @RequestBody MembershipDto dto){
+        return ResponseEntity.ok(membershipService.toDto(membershipService.updateMembership(username,membershipId,membershipService.toEntity(dto))));
+    }
+
     @Operation(summary = "Delete all memberships for one user")
     @DeleteMapping({"/client/{id}"})
     public ResponseEntity<Void> deleteAllMembershipsByClientId(@PathVariable Long id){
@@ -55,6 +61,7 @@ public class MembershipController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Delete one membership for one user")
     @DeleteMapping("/{membershipId}/{username}")
     public ResponseEntity<Void> deleteByMembershipIdAndClientUserName(@PathVariable Long membershipId, @PathVariable String username){
         membershipService.deleteByMembershipIdAndClientUserName(membershipId,username);

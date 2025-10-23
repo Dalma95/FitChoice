@@ -6,7 +6,6 @@ import com.FitChoice.FitChoice.model.enums.PaymentStatus;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data

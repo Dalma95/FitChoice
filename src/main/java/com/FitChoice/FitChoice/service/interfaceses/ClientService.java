@@ -1,6 +1,6 @@
 package com.FitChoice.FitChoice.service.interfaceses;
 
-import com.FitChoice.FitChoice.model.dto.ClientCreateDto;
+import com.FitChoice.FitChoice.model.dto.ClientDto;
 import com.FitChoice.FitChoice.model.dto.ClientResponseDto;
 import com.FitChoice.FitChoice.model.entity.Client;
 
@@ -15,11 +15,13 @@ public interface ClientService {
 
     Optional<Client> findClientById(Long id);
 
+    Client updateClient(Long id, Client client);
+
     void deleteClientById(Long id);
 
-    Client toEntity(ClientCreateDto dto);
+    Client toEntity(ClientDto dto);
 
-    ClientCreateDto toDto(Client client);
+    ClientDto toDto(Client client);
 
     ClientResponseDto toResponseDto(Client client);
 

@@ -1,6 +1,6 @@
 package com.FitChoice.FitChoice.service.implementation;
 
-import com.FitChoice.FitChoice.model.dto.ClientCreateDto;
+import com.FitChoice.FitChoice.model.dto.ClientDto;
 import com.FitChoice.FitChoice.model.dto.ClientResponseDto;
 import com.FitChoice.FitChoice.model.entity.Client;
 import com.FitChoice.FitChoice.repository.ClientRepository;
@@ -38,20 +38,28 @@ public class ClientServiceImplementation implements ClientService {
     }
 
     @Override
+    public Client updateClient(Long id, Client client) {
+        Client clientFound = clientRepository.findById(id).orElseThrow(() -> new RuntimeException("Client not found"));
+        clientFound.setUserName(client.getUserName());
+        clientFound.setEmail(client.getEmail());
+        return clientRepository.save(clientFound);
+    }
+
+    @Override
     public void deleteClientById(Long id) {
         clientRepository.deleteById(id);
     }
 
     @Override
-    public Client toEntity(ClientCreateDto dto){
+    public Client toEntity(ClientDto dto){
         Client client = new Client();
         client.setUserName(dto.getUserName());
         client.setEmail(dto.getEmail());
         return client;
     }
 
-    public ClientCreateDto toDto(Client client){
-        ClientCreateDto dto = new ClientCreateDto();
+    public ClientDto toDto(Client client){
+        ClientDto dto = new ClientDto();
         dto.setUserName(client.getUserName());
         dto.setEmail(client.getEmail());
 

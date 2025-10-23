@@ -38,6 +38,12 @@ public class TrainerController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Update trainer")
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Trainer> updateTrainer(@PathVariable Long id, @RequestBody TrainerDto dto){
+        return ResponseEntity.ok(trainerService.updateTrainer(id, trainerService.toEntity(dto)));
+    }
+
     @Operation(summary = "Delete trainer by ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTrainerById(@PathVariable Long id){

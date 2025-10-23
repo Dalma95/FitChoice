@@ -19,6 +19,8 @@ public interface MembershipService {
 
     List<MembershipDto> getMembershipsByClient(String clientUserName);
 
+    Membership updateMembership(String username, Long id, Membership membership);
+
     void deleteByMembershipIdAndClientUserName(Long id, String clientUserName );
 
     void deleteAllMembershipsByClientId(Long id);

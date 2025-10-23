@@ -32,6 +32,14 @@ public class NutritionistServiceImplementation implements NutritionistService {
     }
 
     @Override
+    public Nutritionist updateNutritionist(Long id, Nutritionist nutritionist) {
+        Nutritionist nutritionistFound = nutritionistRepository.findById(id).orElseThrow(() -> new RuntimeException("Nutritionist not found"));
+        nutritionistFound.setName(nutritionist.getName());
+        nutritionistFound.setPricePerMonth(nutritionist.getPricePerMonth());
+        return nutritionistRepository.save(nutritionistFound);
+    }
+
+    @Override
     public void deleteNutritionistById(Long id) {
         nutritionistRepository.deleteById(id);
 

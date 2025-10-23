@@ -211,6 +211,43 @@ public class MembershipServiceImplementation implements MembershipService {
     }
 
     @Override
+    public Membership updateMembership(String username, Long id,  Membership membership) {
+        Client client = clientRepository.findByUserNameIgnoreCase(username).orElseThrow((() -> new RuntimeException("Client not found")));
+
+        Membership updatedMembership = membershipRepository.findById(id).orElseThrow(() -> new RuntimeException("Membership not found"));
+
+//        Verific că aparține clientului
+        if (!membership.getClient().getId().equals(client.getId())){
+            throw new RuntimeException("This membership does not belong to user: " + username);
+        }
+//        Verific statusul plății — dacă e completă, nu permitem modificări
+        Payment payment = membership.getPayment();
+        if ( payment != null && payment.getStatus() == PaymentStatus.COMPLETED){
+            throw new RuntimeException("You cannot modify membership details after payment is completed.");
+        }
+
+        updatedMembership.setTrainer(membership.getTrainer());
+        updatedMembership.setNutritionist(membership.getNutritionist());
+
+        if (membership.getFitnessClasses().isEmpty()){
+            updatedMembership.getFitnessClasses().clear();
+        }else {
+            updatedMembership.setFitnessClasses(membership.getFitnessClasses());
+        }
+
+//        Recalculăm prețul în funcție de modificări
+        double newPrice = calculateFinalPrice(updatedMembership);
+        updatedMembership.setPrice(newPrice);
+
+//        Rămâne INACTIVE până la plată
+        updatedMembership.setStatus(MembershipStatus.INACTIVE);
+
+        return membershipRepository.save(updatedMembership);
+
+
+    }
+
+    @Override
     public void deleteByMembershipIdAndClientUserName(Long id, String clientUserName) {
         Client client = clientRepository.findByUserNameIgnoreCase(clientUserName)
                 .orElseThrow(() -> new RuntimeException("Client not found with username: " + clientUserName));

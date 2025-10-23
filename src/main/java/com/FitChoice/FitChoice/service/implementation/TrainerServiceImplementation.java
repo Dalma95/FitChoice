@@ -37,6 +37,14 @@ public class TrainerServiceImplementation implements TrainerService {
     }
 
     @Override
+    public Trainer updateTrainer(Long id, Trainer trainer) {
+        Trainer trainerFound = trainerRepository.findById(id).orElseThrow(() -> new RuntimeException("Trainer not found"));
+        trainerFound.setName(trainer.getName());
+        trainerFound.setPricePerMonth(trainer.getPricePerMonth());
+        return trainerRepository.save(trainer);
+    }
+
+    @Override
     public Trainer toEntity(TrainerDto dto) {
         Trainer trainer = new Trainer();
         trainer.setName(dto.getName());

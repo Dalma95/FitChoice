@@ -24,3 +24,4 @@ public class MembershipResponseDto {
     private String trainerName;
     private String nutritionistName;
 }
+//??????

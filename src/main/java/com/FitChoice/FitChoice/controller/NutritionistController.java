@@ -39,6 +39,12 @@ public class NutritionistController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @Operation(summary = "Update nutritionist")
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Nutritionist> updateNutritionist(@PathVariable Long id, @RequestBody NutritionistDto dto){
+        return ResponseEntity.ok(nutritionistService.updateNutritionist(id, nutritionistService.toEntity(dto)));
+    }
+
     @Operation(summary = "Delete nutritionist by ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNutritionistById(@PathVariable Long id){
