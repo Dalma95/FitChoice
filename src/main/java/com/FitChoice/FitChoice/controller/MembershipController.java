@@ -2,8 +2,9 @@ package com.FitChoice.FitChoice.controller;
 
 import com.FitChoice.FitChoice.model.dto.MembershipCreateDto;
 import com.FitChoice.FitChoice.model.dto.MembershipDto;
-import com.FitChoice.FitChoice.model.dto.PaymentDto;
+import com.FitChoice.FitChoice.model.entity.Membership;
 import com.FitChoice.FitChoice.service.interfaceses.MembershipService;
+import com.FitChoice.FitChoice.service.interfaceses.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,26 +21,22 @@ public class MembershipController {
 
     @Operation(summary = "Create membership")
     @PostMapping
-    public ResponseEntity<MembershipDto> createMembership(@RequestBody MembershipCreateDto dto){
+    public ResponseEntity<Membership> createMembership(@RequestBody MembershipCreateDto dto){
         return ResponseEntity.ok(membershipService.createMembership(dto));
     }
 
     @Operation(summary = "Renew membership")
     @PostMapping("/renew/{id}")
-    public ResponseEntity<MembershipDto> renewMembership(@PathVariable Long id){
+    public ResponseEntity<Membership> renewMembership(@PathVariable Long id){
         return ResponseEntity.ok(membershipService.renewMembership(id));
-    }
-
-    @Operation(summary = "Update payment")
-    @PutMapping("/payment")
-    public ResponseEntity<MembershipDto> updatePayment(@RequestBody PaymentDto dto){
-        return ResponseEntity.ok(membershipService.updatePayment(dto));
     }
 
     @Operation(summary = "Find membership by ID")
     @GetMapping("/{id}")
     public ResponseEntity<MembershipDto> getMembershipById(@PathVariable Long id){
-        return ResponseEntity.ok(membershipService.getMembershipById(id));
+        return membershipService.getMembershipById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Find membership by username")

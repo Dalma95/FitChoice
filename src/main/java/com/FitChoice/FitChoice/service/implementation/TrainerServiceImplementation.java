@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TrainerServiceImplementation implements TrainerService {
@@ -22,13 +23,17 @@ public class TrainerServiceImplementation implements TrainerService {
     }
 
     @Override
-    public List<Trainer> findAllTrainers() {
-        return trainerRepository.findAll();
+    public List<TrainerDto> findAllTrainers() {
+        return trainerRepository.findAll()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Trainer> findTrainerById(Long id) {
-        return trainerRepository.findById(id);
+    public Optional<TrainerDto> findTrainerById(Long id) {
+        return trainerRepository.findById(id)
+                .map(this::toDto);
     }
 
     @Override

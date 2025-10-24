@@ -11,9 +11,9 @@ public interface ClientService {
 
     Client createClient(Client client);
 
-    List<Client> findAllClients();
+    List<ClientResponseDto> findAllClients();
 
-    Optional<Client> findClientById(Long id);
+    Optional<ClientDto> findClientById(Long id);
 
     Client updateClient(Long id, Client client);
 

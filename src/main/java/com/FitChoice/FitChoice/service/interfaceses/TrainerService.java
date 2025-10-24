@@ -10,9 +10,9 @@ public interface TrainerService {
 
     Trainer createTrainer(Trainer trainer);
 
-    List<Trainer> findAllTrainers();
+    List<TrainerDto> findAllTrainers();
 
-    Optional<Trainer> findTrainerById(Long id);
+    Optional<TrainerDto> findTrainerById(Long id);
 
     void deleteTrainerById(Long id);
 

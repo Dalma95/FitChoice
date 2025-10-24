@@ -2,15 +2,15 @@ package com.FitChoice.FitChoice.service.implementation;
 
 import com.FitChoice.FitChoice.model.dto.MembershipCreateDto;
 import com.FitChoice.FitChoice.model.dto.MembershipDto;
-import com.FitChoice.FitChoice.model.dto.PaymentDto;
 import com.FitChoice.FitChoice.model.entity.*;
 import com.FitChoice.FitChoice.model.enums.MembershipStatus;
 import com.FitChoice.FitChoice.model.enums.MembershipType;
 import com.FitChoice.FitChoice.model.enums.PaymentStatus;
 import com.FitChoice.FitChoice.repository.*;
 import com.FitChoice.FitChoice.service.interfaceses.MembershipService;
+import com.FitChoice.FitChoice.service.interfaceses.PaymentService;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -19,28 +19,18 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class MembershipServiceImplementation implements MembershipService {
 
-    @Autowired
-    ClientRepository clientRepository;
-
-    @Autowired
-    TrainerRepository trainerRepository;
-
-    @Autowired
-    NutritionistRepository nutritionistRepository;
-
-    @Autowired
-    FitnessClassRepository fitnessClassRepository;
-
-    @Autowired
-    MembershipRepository membershipRepository;
-
-    @Autowired
-    PaymentRepository paymentRepository;
+    private final ClientRepository clientRepository;
+    private final TrainerRepository trainerRepository;
+    private final NutritionistRepository nutritionistRepository;
+    private final FitnessClassRepository fitnessClassRepository;
+    private final MembershipRepository membershipRepository;
+    private final PaymentService paymentService;
 
     @Override
-    public MembershipDto createMembership(MembershipCreateDto dto) {
+    public Membership createMembership(MembershipCreateDto dto) {
 
         Client client = clientRepository.findByUserNameIgnoreCase(dto.getClientUserName())
                 .orElseThrow(() -> new RuntimeException("Client not found."));
@@ -110,7 +100,7 @@ public class MembershipServiceImplementation implements MembershipService {
         }
 
         LocalDate threeMonthsAgo = LocalDate.now().minusMonths(3);
-        if (isEligibleForDiscount(client, membership.getType())) {
+        if (paymentService.isEligibleForDiscount(client, membership.getType())) {
             membership.setDiscountApplied(true);
             finalPrice *= 0.85; // reducere 15%
         } else {
@@ -119,22 +109,17 @@ public class MembershipServiceImplementation implements MembershipService {
 
         membership.setPrice(finalPrice);
 
-        Payment payment = new Payment();
-        payment.setClient(client);
-        payment.setMembership(membership);
-        payment.setAmount(finalPrice);
-        payment.setStatus(PaymentStatus.PENDING);
-        payment.setPaymentDate(LocalDate.now());
+        Payment payment = paymentService.createPaymentForMembership(membership, finalPrice);
         membership.setPayment(payment);
 
         Membership savedMembership = membershipRepository.save(membership);
 
-        return toDto(savedMembership);
+        return savedMembership;
     }
 
 
     @Override
-    public MembershipDto renewMembership(Long membershipId) {
+    public Membership renewMembership(Long membershipId) {
        Membership oldMembership = membershipRepository.findById(membershipId)
                .orElseThrow(() -> new RuntimeException("Membership not found"));
 
@@ -151,9 +136,9 @@ public class MembershipServiceImplementation implements MembershipService {
        newMembership.setEndDate(LocalDate.now().plusMonths(1));
        newMembership.setStatus(MembershipStatus.INACTIVE);
 
-       double finalPrice = calculateFinalPrice(newMembership);
+       double finalPrice = paymentService.calculateFinalPrice(newMembership);
 
-        if (isEligibleForDiscount(oldMembership.getClient(), oldMembership.getType())) {
+        if (paymentService.isEligibleForDiscount(oldMembership.getClient(), oldMembership.getType())) {
             newMembership.setDiscountApplied(true);
             finalPrice *= 0.85;
         } else {
@@ -161,44 +146,17 @@ public class MembershipServiceImplementation implements MembershipService {
         }
         newMembership.setPrice(finalPrice);
 
-       Payment payment = new Payment();
-       payment.setClient(oldMembership.getClient());
-       payment.setMembership(newMembership);
-       payment.setAmount(newMembership.getPrice());
-       payment.setStatus(PaymentStatus.PENDING);
-       payment.setPaymentDate(LocalDate.now());
-       newMembership.setPayment(payment);
+        Payment payment = paymentService.createPaymentForMembership(newMembership, finalPrice);
+        newMembership.setPayment(payment);
 
        Membership savedNewMembership = membershipRepository.save(newMembership);
-       return toDto(savedNewMembership);
+       return savedNewMembership;
     }
 
     @Override
-    public MembershipDto updatePayment(PaymentDto dto) {
-        Payment payment = paymentRepository.findById(dto.getId())
-                .orElseThrow(() -> new RuntimeException("Payment not found"));
-
-        payment.setStatus(dto.getStatus());
-        payment.setPaymentDate(dto.getPaymentDate());
-        paymentRepository.save(payment);
-
-        Membership membership = payment.getMembership();
-        if (dto.getStatus() == PaymentStatus.COMPLETED) {
-            membership.setStatus(MembershipStatus.ACTIVE);
-            membership.setStartDate(LocalDate.now());
-            membership.setEndDate(LocalDate.now().plusMonths(1));
-        }else {
-            membership.setStatus(MembershipStatus.INACTIVE);
-        }
-        membershipRepository.save(membership);
-        return toDto(membership);
-    }
-
-    @Override
-    public MembershipDto getMembershipById(Long id) {
-        Membership membership = membershipRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Membership not found"));
-        return toDto(membership);
+    public Optional<MembershipDto> getMembershipById(Long id) {
+        return membershipRepository.findById(id)
+                .map(this::toDto);
     }
 
     @Override
@@ -211,39 +169,38 @@ public class MembershipServiceImplementation implements MembershipService {
     }
 
     @Override
-    public Membership updateMembership(String username, Long id,  Membership membership) {
+    public Membership updateMembership(String username, Long id,  Membership membershipUpdates) {
         Client client = clientRepository.findByUserNameIgnoreCase(username).orElseThrow((() -> new RuntimeException("Client not found")));
 
-        Membership updatedMembership = membershipRepository.findById(id).orElseThrow(() -> new RuntimeException("Membership not found"));
+        Membership existingMembership = membershipRepository.findById(id).orElseThrow(() -> new RuntimeException("Membership not found"));
 
 //        Verific că aparține clientului
-        if (!membership.getClient().getId().equals(client.getId())){
+        if (!existingMembership.getClient().getId().equals(client.getId())){
             throw new RuntimeException("This membership does not belong to user: " + username);
         }
 //        Verific statusul plății — dacă e completă, nu permitem modificări
-        Payment payment = membership.getPayment();
+        Payment payment = existingMembership.getPayment();
         if ( payment != null && payment.getStatus() == PaymentStatus.COMPLETED){
             throw new RuntimeException("You cannot modify membership details after payment is completed.");
         }
 
-        updatedMembership.setTrainer(membership.getTrainer());
-        updatedMembership.setNutritionist(membership.getNutritionist());
+        existingMembership.setTrainer(membershipUpdates.getTrainer());
+        existingMembership.setNutritionist(membershipUpdates.getNutritionist());
 
-        if (membership.getFitnessClasses().isEmpty()){
-            updatedMembership.getFitnessClasses().clear();
+        if (membershipUpdates.getFitnessClasses() != null || membershipUpdates.getFitnessClasses().isEmpty()){
+            existingMembership.getFitnessClasses().clear();
         }else {
-            updatedMembership.setFitnessClasses(membership.getFitnessClasses());
+            existingMembership.setFitnessClasses(membershipUpdates.getFitnessClasses());
         }
 
 //        Recalculăm prețul în funcție de modificări
-        double newPrice = calculateFinalPrice(updatedMembership);
-        updatedMembership.setPrice(newPrice);
+        double newPrice = paymentService.calculateFinalPrice(existingMembership);
+        existingMembership.setPrice(newPrice);
 
 //        Rămâne INACTIVE până la plată
-        updatedMembership.setStatus(MembershipStatus.INACTIVE);
+        existingMembership.setStatus(MembershipStatus.INACTIVE);
 
-        return membershipRepository.save(updatedMembership);
-
+        return membershipRepository.save(existingMembership);
 
     }
 
@@ -268,45 +225,6 @@ public class MembershipServiceImplementation implements MembershipService {
         Client client = clientRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Client not found"));
         membershipRepository.deleteAllMembershipsByClientId(id);
-    }
-
-//    @Override
-//    public double calculateTotalPrice(Membership membership){
-//        return calculateFinalPrice(membership);
-//    }
-
-
-    private double calculateFinalPrice(Membership membership) {
-        double total = membership.getPrice();
-
-        if (membership.getTrainer() != null) total += membership.getTrainer().getPricePerMonth();
-        if (membership.getNutritionist() != null) total += membership.getNutritionist().getPricePerMonth();
-        if (membership.getFitnessClasses() != null)
-            total += membership.getFitnessClasses().stream()
-                    .mapToDouble(FitnessClass::getPrice)
-                    .sum();
-        return total;
-    }
-
-    private boolean isEligibleForDiscount(Client client, MembershipType type) {
-        List<Membership> memberships = membershipRepository.findByClientIdOrderByEndDateDesc(client.getId());
-
-        int consecutivePaidSameType = 0;
-
-        for (Membership m : memberships) {
-            if (m.getType() == type &&
-                    m.getPayment() != null &&
-                    m.getPayment().getStatus() == PaymentStatus.COMPLETED) {
-                consecutivePaidSameType++;
-                if (consecutivePaidSameType == 3) {
-                    return true; // discount aplicabil doar pentru următorul abonament
-                }
-            } else {
-                consecutivePaidSameType = 0; // reset dacă tip diferit sau neplătit
-            }
-        }
-
-        return false; // nu există 3 consecutive plătite
     }
 
     @Override

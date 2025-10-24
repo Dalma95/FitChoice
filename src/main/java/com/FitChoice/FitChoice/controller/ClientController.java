@@ -28,19 +28,15 @@ public class ClientController {
     @Operation(summary = "Find all clients")
     @GetMapping
     public ResponseEntity<List<ClientResponseDto>> findAllClients(){
-        List<Client> clients = clientService.findAllClients();
+        return ResponseEntity.ok(clientService.findAllClients());
 
-        List<ClientResponseDto> response = clients.stream()
-                .map(clientService :: toResponseDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(response);
     }
 
     @Operation(summary = "Find client by ID")
     @GetMapping("/{id}")
     public ResponseEntity<ClientDto> findClientById(@PathVariable Long id){
         return clientService.findClientById(id)
-                .map(client -> ResponseEntity.ok(clientService.toDto(client)))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 

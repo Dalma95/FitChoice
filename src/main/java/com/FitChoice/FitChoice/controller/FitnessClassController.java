@@ -26,7 +26,7 @@ public class FitnessClassController {
 
     @Operation(summary = "Find all classes")
     @GetMapping
-    public ResponseEntity<List<FitnessClass>> findAllFitnessClasses(){
+    public ResponseEntity<List<FitnessClassDto>> findAllFitnessClasses(){
         return ResponseEntity.ok(fitnessClassService.findAllFitnessClasses());
     }
 
@@ -34,7 +34,7 @@ public class FitnessClassController {
     @GetMapping("/{id}")
     public ResponseEntity<FitnessClassDto> findClassById(@PathVariable Long id){
         return fitnessClassService.findClassById(id)
-                .map(fitnessClass -> ResponseEntity.ok(fitnessClassService.toDto(fitnessClass)))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 

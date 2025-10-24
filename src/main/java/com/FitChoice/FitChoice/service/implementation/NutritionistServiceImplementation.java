@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class NutritionistServiceImplementation implements NutritionistService {
@@ -22,13 +23,18 @@ public class NutritionistServiceImplementation implements NutritionistService {
     }
 
     @Override
-    public List<Nutritionist> findAll() {
-        return nutritionistRepository.findAll();
+    public List<NutritionistDto> findAll() {
+
+        return nutritionistRepository.findAll()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Nutritionist> findNutritionistById(Long id) {
-        return nutritionistRepository.findById(id);
+    public Optional<NutritionistDto> findNutritionistById(Long id) {
+        return nutritionistRepository.findById(id)
+                .map(this::toDto);
     }
 
     @Override

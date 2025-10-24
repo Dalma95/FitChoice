@@ -7,6 +7,7 @@ import com.FitChoice.FitChoice.repository.ClientRepository;
 import com.FitChoice.FitChoice.service.interfaceses.ClientService;
 import com.FitChoice.FitChoice.service.interfaceses.MembershipService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,13 +29,17 @@ public class ClientServiceImplementation implements ClientService {
     }
 
     @Override
-    public List<Client> findAllClients(){
-        return clientRepository.findAll();
+    public List<ClientResponseDto> findAllClients(){
+        return clientRepository.findAll()
+                .stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Client> findClientById(Long id){
-        return clientRepository.findById(id);
+    public Optional<ClientDto> findClientById(Long id){
+        return clientRepository.findById(id)
+                .map(this::toDto);
     }
 
     @Override

@@ -13,11 +13,7 @@ import java.util.List;
 
 public interface MembershipRepository extends JpaRepository<Membership, Long> {
 
-    List<Membership> findTop3ByClientIdAndTypeOrderByEndDateDesc(Long clientId, MembershipType type);
-
     List<Membership> findByClientId(Long id);
-
-    int countByClient_IdAndEndDateAfter(Long clientId, LocalDate threeMonthsAgo);
 
     void deleteAllMembershipsByClientId(Long id);
 

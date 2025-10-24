@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FitnessClassServiceImplementation implements FitnessClassService {
@@ -22,13 +23,17 @@ public class FitnessClassServiceImplementation implements FitnessClassService {
     }
 
     @Override
-    public List<FitnessClass> findAllFitnessClasses() {
-        return fitnessClassRepository.findAll();
+    public List<FitnessClassDto> findAllFitnessClasses() {
+        return fitnessClassRepository.findAll()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<FitnessClass> findClassById(Long id) {
-        return fitnessClassRepository.findById(id);
+    public Optional<FitnessClassDto> findClassById(Long id) {
+        return fitnessClassRepository.findById(id)
+                .map(this::toDto);
     }
 
     @Override

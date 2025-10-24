@@ -27,7 +27,7 @@ public class NutritionistController {
 
     @Operation(summary = "Find all nutritionists")
     @GetMapping
-    public ResponseEntity<List<Nutritionist>> findAllNutritionists(){
+    public ResponseEntity<List<NutritionistDto>> findAllNutritionists(){
         return ResponseEntity.ok(nutritionistService.findAll());
     }
 
@@ -35,7 +35,7 @@ public class NutritionistController {
     @GetMapping("/{id}")
     public ResponseEntity<NutritionistDto> findNutritionistById(@PathVariable Long id){
         return nutritionistService.findNutritionistById(id)
-                .map(nutritionist -> ResponseEntity.ok(nutritionistService.toDto(nutritionist)))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 

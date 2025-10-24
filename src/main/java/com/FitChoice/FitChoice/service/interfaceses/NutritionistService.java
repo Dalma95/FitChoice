@@ -10,9 +10,9 @@ public interface NutritionistService {
 
     Nutritionist createNutritionist(Nutritionist nutritionist);
 
-    List<Nutritionist> findAll();
+    List<NutritionistDto> findAll();
 
-    Optional<Nutritionist> findNutritionistById(Long id);
+    Optional<NutritionistDto> findNutritionistById(Long id);
 
     Nutritionist updateNutritionist(Long id, Nutritionist nutritionist);
 

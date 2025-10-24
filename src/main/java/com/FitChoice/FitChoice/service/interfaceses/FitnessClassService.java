@@ -10,9 +10,9 @@ public interface FitnessClassService {
 
     FitnessClass createFitnessClass(FitnessClass fitnessClass);
 
-    List<FitnessClass> findAllFitnessClasses();
+    List<FitnessClassDto> findAllFitnessClasses();
 
-    Optional<FitnessClass> findClassById(Long id);
+    Optional<FitnessClassDto> findClassById(Long id);
 
     FitnessClass updateFitnessClass(Long id, FitnessClass fitnessClass);
 

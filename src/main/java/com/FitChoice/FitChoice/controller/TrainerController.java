@@ -26,7 +26,7 @@ public class TrainerController {
 
     @Operation(summary = "Find all trainers")
     @GetMapping
-    public ResponseEntity<List<Trainer>> findAllTrainers(){
+    public ResponseEntity<List<TrainerDto>> findAllTrainers(){
         return ResponseEntity.ok(trainerService.findAllTrainers());
     }
 
@@ -34,7 +34,7 @@ public class TrainerController {
     @GetMapping("/{id}")
     public ResponseEntity<TrainerDto> findTrainerById(@PathVariable Long id){
         return trainerService.findTrainerById(id)
-                .map(trainer -> ResponseEntity.ok(trainerService.toDto(trainer)))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 

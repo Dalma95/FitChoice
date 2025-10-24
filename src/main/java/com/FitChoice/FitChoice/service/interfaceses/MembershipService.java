@@ -6,16 +6,15 @@ import com.FitChoice.FitChoice.model.dto.PaymentDto;
 import com.FitChoice.FitChoice.model.entity.Membership;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MembershipService {
 
-    MembershipDto createMembership(MembershipCreateDto dto);
+    Membership createMembership(MembershipCreateDto dto);
 
-    MembershipDto renewMembership(Long membershipId);
+    Membership renewMembership(Long membershipId);
 
-    MembershipDto updatePayment(PaymentDto dto);
-
-    MembershipDto getMembershipById(Long id);
+    Optional<MembershipDto> getMembershipById(Long id);
 
     List<MembershipDto> getMembershipsByClient(String clientUserName);
 
