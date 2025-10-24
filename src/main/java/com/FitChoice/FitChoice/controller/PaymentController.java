@@ -27,7 +27,9 @@ public class PaymentController {
     @Operation(summary = "Find payment by id")
     @GetMapping("/{id}")
     public ResponseEntity<PaymentDto> getPaymentById(@PathVariable Long id){
-        return ResponseEntity.ok(paymentService.getPaymentById(id));
+        return paymentService.getPaymentById(id)
+                .map(ResponseEntity ::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Operation(summary = "Find all payments for one user by user name")
