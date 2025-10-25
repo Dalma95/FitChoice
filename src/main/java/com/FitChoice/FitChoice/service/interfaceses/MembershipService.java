@@ -18,7 +18,7 @@ public interface MembershipService {
 
     List<MembershipDto> getMembershipsByClient(String clientUserName);
 
-    Membership updateMembership(String username, Long id, Membership membership);
+    Membership updateMembership(String username, Long id, MembershipCreateDto dto);
 
     void deleteByMembershipIdAndClientUserName(Long id, String clientUserName );
 
@@ -27,4 +27,6 @@ public interface MembershipService {
     Membership toEntity(MembershipDto membershipDto);
 
     MembershipDto toDto (Membership membership);
+
+    Membership toEntityFromCreateDto(MembershipCreateDto dto);
 }

@@ -13,7 +13,7 @@ public interface PaymentService {
 
     Payment createPaymentForMembership(Membership membership, double amount);
 
-    Payment updatePayment(Payment payment);
+    Payment updatePayment(Long id, Payment payment);
 
     double calculateFinalPrice(Membership membership);
 

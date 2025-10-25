@@ -44,8 +44,8 @@ public class PaymentServiceImplementation implements PaymentService {
     }
 
     @Override
-    public Payment updatePayment(Payment payment) {
-        Payment updatedPayment = paymentRepository.findById(payment.getId())
+    public Payment updatePayment(Long id, Payment payment) {
+        Payment updatedPayment = paymentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
 
         updatedPayment.setStatus(payment.getStatus());
@@ -69,20 +69,38 @@ public class PaymentServiceImplementation implements PaymentService {
 
     @Override
     public double calculateFinalPrice(Membership membership) {
-        double basePrice = 150.0;
+        final double basePrice = 150.0;
+        final double trainerIncludedPrice = 500.0;
+        final double nutritionistIncludedPrice = 150.0;
+
         double total = basePrice;
+        MembershipType type = membership.getType() != null ? membership.getType() : MembershipType.FULLFITNESS;
 
-        if (membership.getTrainer() != null)
-            total += membership.getTrainer().getPricePerMonth();
+        switch (type) {
+            case GYM_PRO:
+                total += trainerIncludedPrice;
+                break;
 
-        if (membership.getNutritionist() != null)
-            total += membership.getNutritionist().getPricePerMonth();
+            case GYM_STAR:
+                total += trainerIncludedPrice + nutritionistIncludedPrice;
+                break;
 
-        if (membership.getFitnessClasses() != null)
-            total += membership.getFitnessClasses()
-                    .stream()
+            case FULLFITNESS:
+            default:
+                // FULLFITNESS nu include nimic; se adaugă doar dacă userul a ales manual
+                if (membership.getTrainer() != null && membership.getTrainer().getPricePerMonth() != null)
+                    total += membership.getTrainer().getPricePerMonth();
+
+                if (membership.getNutritionist() != null && membership.getNutritionist().getPricePerMonth() != null)
+                    total += membership.getNutritionist().getPricePerMonth();
+                break;
+        }
+
+        if (membership.getFitnessClasses() != null && !membership.getFitnessClasses().isEmpty()) {
+            total += membership.getFitnessClasses().stream()
                     .mapToDouble(FitnessClass::getPrice)
                     .sum();
+        }
 
         return total;
     }

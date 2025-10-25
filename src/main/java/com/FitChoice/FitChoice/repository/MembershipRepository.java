@@ -17,7 +17,6 @@ public interface MembershipRepository extends JpaRepository<Membership, Long> {
 
     void deleteAllMembershipsByClientId(Long id);
 
-
     List<Membership> findByClientIdOrderByEndDateDesc(Long id);
 }
 

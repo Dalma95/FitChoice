@@ -19,13 +19,13 @@ public class PaymentController {
     PaymentService paymentService;
 
     @Operation(summary = "Update payment")
-    @PutMapping("/update")
-    public ResponseEntity<Payment> updatePayment(@RequestBody PaymentDto dto){
-        return ResponseEntity.ok(paymentService.updatePayment(paymentService.toEntity(dto)));
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Payment> updatePayment(@PathVariable Long id, @RequestBody PaymentDto dto){
+        return ResponseEntity.ok(paymentService.updatePayment(id, paymentService.toEntity(dto)));
     }
 
     @Operation(summary = "Find payment by id")
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<PaymentDto> getPaymentById(@PathVariable Long id){
         return paymentService.getPaymentById(id)
                 .map(ResponseEntity ::ok)
@@ -33,7 +33,7 @@ public class PaymentController {
     }
 
     @Operation(summary = "Find all payments for one user by user name")
-    @GetMapping("/{username}")
+    @GetMapping("/username/{username}")
     public ResponseEntity<List<PaymentDto>> getPaymentsByClient(@PathVariable String username){
         return ResponseEntity.ok(paymentService.getPaymentsByClient(username));
     }

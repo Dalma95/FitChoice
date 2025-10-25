@@ -45,10 +45,15 @@ public class MembershipController {
         return ResponseEntity.ok(membershipService.getMembershipsByClient(username));
     }
 
-    @Operation(summary = "Update membership (type, trainer, nutritionist or fitness classes")
+    @Operation(summary = "Update membership (type, trainer, nutritionist or fitness classes)")
     @PutMapping("/{username}/{membershipId}")
-    public ResponseEntity<MembershipDto> updateMembership(@PathVariable String username, @PathVariable Long membershipId, @RequestBody MembershipDto dto){
-        return ResponseEntity.ok(membershipService.toDto(membershipService.updateMembership(username,membershipId,membershipService.toEntity(dto))));
+    public ResponseEntity<MembershipDto> updateMembership(
+            @PathVariable String username,
+            @PathVariable Long membershipId,
+            @RequestBody MembershipCreateDto dto
+    ) {
+        Membership updated = membershipService.updateMembership(username, membershipId, dto);
+        return ResponseEntity.ok(membershipService.toDto(updated));
     }
 
     @Operation(summary = "Delete all memberships for one user")

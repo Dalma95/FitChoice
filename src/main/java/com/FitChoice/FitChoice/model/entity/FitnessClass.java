@@ -1,6 +1,5 @@
 package com.FitChoice.FitChoice.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 

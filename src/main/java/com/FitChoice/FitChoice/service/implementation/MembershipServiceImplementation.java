@@ -27,6 +27,7 @@ public class MembershipServiceImplementation implements MembershipService {
     private final NutritionistRepository nutritionistRepository;
     private final FitnessClassRepository fitnessClassRepository;
     private final MembershipRepository membershipRepository;
+    private final PaymentRepository paymentRepository;
     private final PaymentService paymentService;
 
     @Override
@@ -42,64 +43,50 @@ public class MembershipServiceImplementation implements MembershipService {
         membership.setStartDate(LocalDate.now());
         membership.setEndDate(LocalDate.now().plusMonths(1));
 
-        double basePrice =150.0;
-        double trainerPrice= 500.0;
-        double nutritionistPrice = 150.0;
-        double finalPrice = basePrice;
 
         switch (membership.getType()){
             case GYM_PRO :
-                Trainer trainer = trainerRepository.findAll().stream().findFirst()
+                Trainer defaulTrainer = trainerRepository.findAll().stream().findFirst()
                         .orElseThrow(() -> new RuntimeException("No trainers available."));
-                membership.setTrainer(trainer);
-                finalPrice += trainerPrice;
+                membership.setTrainer(defaulTrainer);
                 break;
 
             case GYM_STAR:
-                Trainer trainer1 = trainerRepository.findAll().stream().findFirst()
+                Trainer defaulTrainer2 = trainerRepository.findAll().stream().findFirst()
                         .orElseThrow(() -> new RuntimeException("No trainers available."));
-                Nutritionist nutritionist = nutritionistRepository.findAll().stream().findFirst()
+                Nutritionist defaultNutritionist = nutritionistRepository.findAll().stream().findFirst()
                         .orElseThrow(() -> new RuntimeException("No nutritionists available"));
-                membership.setTrainer(trainer1);
-                membership.setNutritionist(nutritionist);
-                finalPrice+= trainerPrice+nutritionistPrice;
+                membership.setTrainer(defaulTrainer2);
+                membership.setNutritionist(defaultNutritionist);
                 break;
 
             case FULLFITNESS:
-                if (dto.getTrainerName() != null && !dto.getTrainerName().isBlank()){
+            default:
+                if (dto.getTrainerName() != null && !dto.getTrainerName().isBlank()) {
                     Trainer chosenTrainer = trainerRepository.findTrainerByNameIgnoreCase(dto.getTrainerName())
-                            .orElseThrow(() -> new RuntimeException("Trainer not found"));
-                    finalPrice+= chosenTrainer.getPricePerMonth();
+                            .orElseThrow(() -> new RuntimeException("Trainer not found."));
                     membership.setTrainer(chosenTrainer);
-
                 }
-                if (dto.getNutritionistName() != null && !dto.getNutritionistName().isBlank()){
+                if (dto.getNutritionistName() != null && !dto.getNutritionistName().isBlank()) {
                     Nutritionist chosenNutritionist = nutritionistRepository.findNutritionistByNameIgnoreCase(dto.getNutritionistName())
-                            .orElseThrow(() -> new RuntimeException("Nutritionist not found"));
-                    finalPrice+= chosenNutritionist.getPricePerMonth();
+                            .orElseThrow(() -> new RuntimeException("Nutritionist not found."));
                     membership.setNutritionist(chosenNutritionist);
-
                 }
                 break;
         }
+
         if (dto.getFitnessClasses() != null && !dto.getFitnessClasses().isEmpty()){
             Set<FitnessClass> fitnessClasses = dto.getFitnessClasses().stream()
                     .map(name -> fitnessClassRepository.findFitnessClassByNameIgnoreCase(name)
                             .orElseThrow(() -> new RuntimeException("Class not found ")))
                     .collect(Collectors.toSet());
             membership.setFitnessClasses(fitnessClasses);
-
-            double fitnessClassesTotal = fitnessClasses.stream()
-                    .mapToDouble(FitnessClass::getPrice)
-                    .sum();
-
-            finalPrice += fitnessClassesTotal;
-
         }else {
             membership.setFitnessClasses(null);
         }
 
-        LocalDate threeMonthsAgo = LocalDate.now().minusMonths(3);
+        double finalPrice = paymentService.calculateFinalPrice(membership);
+
         if (paymentService.isEligibleForDiscount(client, membership.getType())) {
             membership.setDiscountApplied(true);
             finalPrice *= 0.85; // reducere 15%
@@ -169,39 +156,76 @@ public class MembershipServiceImplementation implements MembershipService {
     }
 
     @Override
-    public Membership updateMembership(String username, Long id,  Membership membershipUpdates) {
-        Client client = clientRepository.findByUserNameIgnoreCase(username).orElseThrow((() -> new RuntimeException("Client not found")));
+    public Membership updateMembership(String username, Long id, MembershipCreateDto dto) {
+        Client client = clientRepository.findByUserNameIgnoreCase(username)
+                .orElseThrow(() -> new RuntimeException("Client not found"));
 
-        Membership existingMembership = membershipRepository.findById(id).orElseThrow(() -> new RuntimeException("Membership not found"));
+        Membership existingMembership = membershipRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Membership not found"));
 
-//        Verific că aparține clientului
-        if (!existingMembership.getClient().getId().equals(client.getId())){
+        // verificăm că aparține clientului
+        if (!existingMembership.getClient().getId().equals(client.getId())) {
             throw new RuntimeException("This membership does not belong to user: " + username);
         }
-//        Verific statusul plății — dacă e completă, nu permitem modificări
+
+        // verificăm plata
         Payment payment = existingMembership.getPayment();
-        if ( payment != null && payment.getStatus() == PaymentStatus.COMPLETED){
+        if (payment != null && payment.getStatus() == PaymentStatus.COMPLETED) {
             throw new RuntimeException("You cannot modify membership details after payment is completed.");
         }
 
-        existingMembership.setTrainer(membershipUpdates.getTrainer());
-        existingMembership.setNutritionist(membershipUpdates.getNutritionist());
-
-        if (membershipUpdates.getFitnessClasses() != null || membershipUpdates.getFitnessClasses().isEmpty()){
-            existingMembership.getFitnessClasses().clear();
-        }else {
-            existingMembership.setFitnessClasses(membershipUpdates.getFitnessClasses());
+        // actualizăm tipul
+        if (dto.getType() != null) {
+            existingMembership.setType(dto.getType());
         }
 
-//        Recalculăm prețul în funcție de modificări
+        // actualizăm trainerul (dacă există în DTO)
+        if (dto.getTrainerName() != null && !dto.getTrainerName().isBlank()) {
+            Trainer trainer = trainerRepository.findTrainerByNameIgnoreCase(dto.getTrainerName())
+                    .orElseThrow(() -> new RuntimeException("Trainer not found"));
+            existingMembership.setTrainer(trainer);
+        } else {
+            existingMembership.setTrainer(null);
+        }
+
+        // actualizăm nutriționistul
+        if (dto.getNutritionistName() != null && !dto.getNutritionistName().isBlank()) {
+            Nutritionist nutritionist = nutritionistRepository.findNutritionistByNameIgnoreCase(dto.getNutritionistName())
+                    .orElseThrow(() -> new RuntimeException("Nutritionist not found"));
+            existingMembership.setNutritionist(nutritionist);
+        } else {
+            existingMembership.setNutritionist(null);
+        }
+
+        // actualizăm clasele
+        if (dto.getFitnessClasses() != null && !dto.getFitnessClasses().isEmpty()) {
+            Set<FitnessClass> fitnessClasses = dto.getFitnessClasses().stream()
+                    .map(name -> fitnessClassRepository.findFitnessClassByNameIgnoreCase(name)
+                            .orElseThrow(() -> new RuntimeException("Fitness class not found: " + name)))
+                    .collect(Collectors.toSet());
+            existingMembership.setFitnessClasses(fitnessClasses);
+        } else {
+            existingMembership.setFitnessClasses(new HashSet<>());
+        }
+
+        // recalculăm prețul
         double newPrice = paymentService.calculateFinalPrice(existingMembership);
         existingMembership.setPrice(newPrice);
 
-//        Rămâne INACTIVE până la plată
+        // actualizăm statusul
         existingMembership.setStatus(MembershipStatus.INACTIVE);
 
-        return membershipRepository.save(existingMembership);
+        // actualizăm și payment-ul
+        if (existingMembership.getPayment() != null) {
+            existingMembership.getPayment().setAmount(newPrice);
+            existingMembership.getPayment().setStatus(PaymentStatus.PENDING);
+            paymentRepository.save(existingMembership.getPayment());
+        } else {
+            Payment newPayment = paymentService.createPaymentForMembership(existingMembership, newPrice);
+            existingMembership.setPayment(newPayment);
+        }
 
+        return membershipRepository.save(existingMembership);
     }
 
     @Override
@@ -318,5 +342,62 @@ public class MembershipServiceImplementation implements MembershipService {
             dto.setPaymentStatus(membership.getPayment().getStatus());
         }
         return dto;
-}}
+}
+
+    @Override
+    public Membership toEntityFromCreateDto(MembershipCreateDto dto) {
+        Membership membership = new Membership();
+
+        membership.setType(dto.getType());
+        membership.setStatus(MembershipStatus.INACTIVE);
+        membership.setDiscountApplied(false);
+
+        if (dto.getClientUserName() != null && !dto.getClientUserName().isBlank()) {
+            Client client = clientRepository.findByUserNameIgnoreCase(dto.getClientUserName())
+                    .orElseGet(() -> {
+                        Client c = new Client();
+                        c.setUserName(dto.getClientUserName());
+                        return clientRepository.save(c);
+                    });
+            membership.setClient(client);
+        }
+
+        if (dto.getTrainerName() != null && !dto.getTrainerName().isBlank()) {
+            Trainer trainer = trainerRepository.findTrainerByNameIgnoreCase(dto.getTrainerName())
+                    .orElseGet(() -> {
+                        Trainer t = new Trainer();
+                        t.setName(dto.getTrainerName());
+                        return trainerRepository.save(t);
+                    });
+            membership.setTrainer(trainer);
+        }
+
+        if (dto.getNutritionistName() != null && !dto.getNutritionistName().isBlank()) {
+            Nutritionist nutritionist = nutritionistRepository.findNutritionistByNameIgnoreCase(dto.getNutritionistName())
+                    .orElseGet(() -> {
+                        Nutritionist n = new Nutritionist();
+                        n.setName(dto.getNutritionistName());
+                        return nutritionistRepository.save(n);
+                    });
+            membership.setNutritionist(nutritionist);
+        }
+
+        if (dto.getFitnessClasses() != null && !dto.getFitnessClasses().isEmpty()) {
+            Set<FitnessClass> fitnessClasses = dto.getFitnessClasses().stream()
+                    .filter(n -> n != null && !n.isBlank())
+                    .map(name -> fitnessClassRepository.findFitnessClassByNameIgnoreCase(name)
+                            .orElseGet(() -> {
+                                FitnessClass f = new FitnessClass();
+                                f.setName(name);
+                                return fitnessClassRepository.save(f);
+                            })
+                    ).collect(Collectors.toSet());
+            membership.setFitnessClasses(fitnessClasses);
+        }
+
+        return membershipRepository.save(membership);
+    }
+    }
+
+
 

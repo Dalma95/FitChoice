@@ -1,158 +1,106 @@
 package com.FitChoice.FitChoice;
 
-
 import com.FitChoice.FitChoice.model.dto.MembershipCreateDto;
 import com.FitChoice.FitChoice.model.entity.*;
+import com.FitChoice.FitChoice.model.enums.MembershipStatus;
 import com.FitChoice.FitChoice.model.enums.MembershipType;
-import com.FitChoice.FitChoice.model.enums.PaymentStatus;
 import com.FitChoice.FitChoice.repository.*;
 import com.FitChoice.FitChoice.service.implementation.MembershipServiceImplementation;
+import com.FitChoice.FitChoice.service.interfaceses.PaymentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-public class MembershipServiceTest {
+class MembershipServiceTest {
 
     @Mock
     private ClientRepository clientRepository;
-
     @Mock
-    private TrainerRepository trainerRepository;
-
+    private MembershipRepository membershipRepository;
     @Mock
-    private NutritionistRepository nutritionistRepository;
-
-    @Mock
-    MembershipRepository membershipRepository;
-
-    @Mock
-    FitnessClassRepository fitnessClassRepository;
+    private PaymentService paymentService;
 
     @InjectMocks
     private MembershipServiceImplementation membershipService;
 
-    private Client testClient;
-    private Trainer testTrainer;
-    private Nutritionist testNutritionist;
-
+    private Client client;
+    private Membership membership;
+    private Payment payment;
 
     @BeforeEach
-    void setUp(){
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
 
-        testClient = new Client();
-        testClient.setId(1L);
-        testClient.setUserName("Elena");
-        testClient.setEmail("elena@gmail.com");
+        client = new Client();
+        client.setId(1L);
+        client.setUserName("testUser");
 
-        testTrainer = new Trainer();
-        testTrainer.setId(1L);
-        testTrainer.setName("Bogdan");
-        testTrainer.setPricePerMonth(500.0);
+        membership = new Membership();
+        membership.setId(10L);
+        membership.setClient(client);
 
-        testNutritionist = new Nutritionist();
-        testNutritionist.setId(1L);
-        testNutritionist.setName("Alin");
-        testNutritionist.setPricePerMonth(150.0);
-
+        payment = new Payment();
+        payment.setId(100L);
+        payment.setClient(client);
+        payment.setAmount(150.0);
     }
-@Test
-    void createMembership_withTrainerAndNutritionist_shouldCalculatePriceCorrectly(){
 
+    @Test
+    void testCreateMembership_ShouldReturnSuccess() {
         MembershipCreateDto dto = new MembershipCreateDto();
-        dto.setClientUserName("Elena");
+        dto.setClientUserName("testUser");
         dto.setType(MembershipType.FULLFITNESS);
-        dto.setTrainerName("Bogdan");
-        dto.setNutritionistName("Alin");
 
-        when(clientRepository.findByUserNameIgnoreCase("Elena")).thenReturn(Optional.of(testClient));
-        when(trainerRepository.findTrainerByNameIgnoreCase("Bogdan")).thenReturn(Optional.of(testTrainer));
-        when(nutritionistRepository.findNutritionistByNameIgnoreCase("Alin")).thenReturn(Optional.of(testNutritionist));
-        when(membershipRepository.findByClientIdOrderByEndDateDesc(1L)).thenReturn(Collections.emptyList());
+        when(clientRepository.findByUserNameIgnoreCase("testUser")).thenReturn(Optional.of(client));
+        when(paymentService.isEligibleForDiscount(any(), any())).thenReturn(false);
+        when(paymentService.createPaymentForMembership(any(), anyDouble())).thenReturn(payment);
         when(membershipRepository.save(any(Membership.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var result = membershipService.createMembership(dto);
+        Membership result = membershipService.createMembership(dto);
 
         assertNotNull(result);
-        assertEquals(800.0,result.getPrice(), 0.01);
-        assertFalse(result.isDiscountApplied());
+        assertEquals(client, result.getClient());
+        assertEquals(MembershipStatus.INACTIVE, result.getStatus());
+        assertEquals(150.0, result.getPrice());
+        verify(paymentService).createPaymentForMembership(any(), anyDouble());
     }
 
     @Test
-    void createMembership_shouldApplyDiscountWhenClientHasThreePreviousCompletedMemberships() {
-        // Arrange
-        MembershipCreateDto dto = new MembershipCreateDto();
-        dto.setClientUserName("Elena");
-        dto.setType(MembershipType.FULLFITNESS);
-
-        // Simulăm cele 3 abonamente anterioare plătite de același tip
-        List<Membership> lastThree = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            Membership m = new Membership();
-            m.setType(MembershipType.FULLFITNESS);
-            Payment p = new Payment();
-            p.setStatus(PaymentStatus.COMPLETED);
-            m.setPayment(p);
-            lastThree.add(m);
-        }
-
-        when(clientRepository.findByUserNameIgnoreCase("Elena")).thenReturn(Optional.of(testClient));
-        when(membershipRepository.findByClientIdOrderByEndDateDesc(1L)).thenReturn(lastThree);
+    void testRenewMembership_ShouldReturnSuccess() {
+        membership.setType(MembershipType.GYM_PRO);
+        membership.setPrice(150.0);
+        membership.setPayment(payment);
+        when(membershipRepository.findById(10L)).thenReturn(Optional.of(membership));
+        when(paymentService.calculateFinalPrice(any())).thenReturn(150.0);
+        when(paymentService.createPaymentForMembership(any(), anyDouble())).thenReturn(payment);
         when(membershipRepository.save(any(Membership.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Act – creăm al patrulea abonament
-        var result = membershipService.createMembership(dto);
+        Membership result = membershipService.renewMembership(10L);
 
-        // Assert – reducerea trebuie aplicată
-        assertTrue(result.isDiscountApplied());
-        assertEquals(127.5, result.getPrice(), 0.01); // presupunând că prețul de bază e 150 și reducerea e 15%
+        assertNotNull(result);
+        assertEquals(MembershipStatus.INACTIVE, result.getStatus());
+        verify(paymentService).createPaymentForMembership(any(), anyDouble());
     }
 
-
     @Test
-    void createMembership_ShouldNotApplyDiscount_WhenNotAllPreviousArePaidOrDifferentType() {
-        MembershipCreateDto dto = new MembershipCreateDto();
-        dto.setClientUserName("elena");
-        dto.setType(MembershipType.FULLFITNESS);
+    void testGetMembershipsByClient_ShouldReturnSuccess() {
+        membership.setId(20L);
+        membership.setStatus(MembershipStatus.ACTIVE);
 
-        Membership m1 = new Membership();
-        m1.setType(MembershipType.FULLFITNESS);
-        Payment p1 = new Payment();
-        p1.setStatus(PaymentStatus.COMPLETED);
-        m1.setPayment(p1);
+        when(clientRepository.findByUserNameIgnoreCase("testUser")).thenReturn(Optional.of(client));
+        when(membershipRepository.findByClientId(1L)).thenReturn(List.of(membership));
 
-        Membership m2 = new Membership();
-        m2.setType(MembershipType.GYM_PRO); // alt tip!
-        Payment p2 = new Payment();
-        p2.setStatus(PaymentStatus.COMPLETED);
-        m2.setPayment(p2);
+        var result = membershipService.getMembershipsByClient("testUser");
 
-        Membership m3 = new Membership();
-        m3.setType(MembershipType.FULLFITNESS);
-        Payment p3 = new Payment();
-        p3.setStatus(PaymentStatus.PENDING);
-        m3.setPayment(p3);
-
-        List<Membership> lastThree = Arrays.asList(m1, m2, m3);
-
-        when(clientRepository.findByUserNameIgnoreCase("elena")).thenReturn(Optional.of(testClient));
-        when(membershipRepository.findByClientIdOrderByEndDateDesc(1L)).thenReturn(lastThree);
-        when(membershipRepository.save(any(Membership.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        var result = membershipService.createMembership(dto);
-
-        assertFalse(result.isDiscountApplied());
-        assertEquals(150.0, result.getPrice(), 0.01);
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("testUser", result.get(0).getClientUserName());
+        verify(membershipRepository).findByClientId(1L);
     }
 
 }
-

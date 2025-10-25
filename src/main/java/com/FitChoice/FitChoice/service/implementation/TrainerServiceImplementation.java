@@ -46,7 +46,7 @@ public class TrainerServiceImplementation implements TrainerService {
         Trainer trainerFound = trainerRepository.findById(id).orElseThrow(() -> new RuntimeException("Trainer not found"));
         trainerFound.setName(trainer.getName());
         trainerFound.setPricePerMonth(trainer.getPricePerMonth());
-        return trainerRepository.save(trainer);
+        return trainerRepository.save(trainerFound);
     }
 
     @Override
