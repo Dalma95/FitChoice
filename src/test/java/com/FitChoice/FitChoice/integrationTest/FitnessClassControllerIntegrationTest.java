@@ -29,7 +29,6 @@ class FitnessClassControllerIntegrationTest {
 
         FitnessClassDto dto = new FitnessClassDto();
         dto.setName("Pilates");
-        dto.setCapacity(10);
         dto.setPrice(59.99);
 
 
@@ -38,14 +37,12 @@ class FitnessClassControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Pilates"))
-                .andExpect(jsonPath("$.capacity").value(10))
                 .andExpect(jsonPath("$.price").value(59.99));
 
 
         mockMvc.perform(get("/api/fitnessClasses"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Pilates"))
-                .andExpect(jsonPath("$[0].capacity").value(10))
                 .andExpect(jsonPath("$[0].price").value(59.99));
     }
 }

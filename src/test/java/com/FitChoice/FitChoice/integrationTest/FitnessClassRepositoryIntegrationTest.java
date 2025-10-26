@@ -23,7 +23,6 @@ class FitnessClassRepositoryIntegrationTest {
 
         FitnessClass yogaClass = new FitnessClass();
         yogaClass.setName("Yoga");
-        yogaClass.setCapacity(15);
         yogaClass.setPrice(49.99);
 
         fitnessClassRepository.save(yogaClass);
@@ -34,7 +33,6 @@ class FitnessClassRepositoryIntegrationTest {
 
         assertThat(found).isPresent();
         assertThat(found.get().getName()).isEqualTo("Yoga");
-        assertThat(found.get().getCapacity()).isEqualTo(15);
         assertThat(found.get().getPrice()).isEqualTo(49.99);
     }
 }
