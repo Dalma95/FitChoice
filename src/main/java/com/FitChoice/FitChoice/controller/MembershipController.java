@@ -4,7 +4,6 @@ import com.FitChoice.FitChoice.model.dto.MembershipCreateDto;
 import com.FitChoice.FitChoice.model.dto.MembershipDto;
 import com.FitChoice.FitChoice.model.entity.Membership;
 import com.FitChoice.FitChoice.service.interfaceses.MembershipService;
-import com.FitChoice.FitChoice.service.interfaceses.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

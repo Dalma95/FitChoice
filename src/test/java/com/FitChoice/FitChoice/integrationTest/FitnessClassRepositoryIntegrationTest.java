@@ -20,7 +20,7 @@ class FitnessClassRepositoryIntegrationTest {
     @Test
     @DisplayName("Should save and find FitnessClass by name ignoring case")
     void testFindFitnessClassByNameIgnoreCase() {
-        // given
+
         FitnessClass yogaClass = new FitnessClass();
         yogaClass.setName("Yoga");
         yogaClass.setCapacity(15);
@@ -28,10 +28,10 @@ class FitnessClassRepositoryIntegrationTest {
 
         fitnessClassRepository.save(yogaClass);
 
-        // when
+
         Optional<FitnessClass> found = fitnessClassRepository.findFitnessClassByNameIgnoreCase("yoga");
 
-        // then
+
         assertThat(found).isPresent();
         assertThat(found.get().getName()).isEqualTo("Yoga");
         assertThat(found.get().getCapacity()).isEqualTo(15);

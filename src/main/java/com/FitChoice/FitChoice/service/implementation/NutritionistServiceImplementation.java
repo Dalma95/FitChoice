@@ -1,5 +1,6 @@
 package com.FitChoice.FitChoice.service.implementation;
 
+import com.FitChoice.FitChoice.model.dto.NutritionistCreateDto;
 import com.FitChoice.FitChoice.model.dto.NutritionistDto;
 import com.FitChoice.FitChoice.model.entity.Nutritionist;
 import com.FitChoice.FitChoice.repository.NutritionistRepository;
@@ -52,7 +53,7 @@ public class NutritionistServiceImplementation implements NutritionistService {
     }
 
     @Override
-    public Nutritionist toEntity(NutritionistDto dto) {
+    public Nutritionist toEntity(NutritionistCreateDto dto) {
         Nutritionist nutritionist = new Nutritionist();
         nutritionist.setName(dto.getName());
         nutritionist.setPricePerMonth(dto.getPricePerMonth());
@@ -62,6 +63,7 @@ public class NutritionistServiceImplementation implements NutritionistService {
     @Override
     public NutritionistDto toDto(Nutritionist nutritionist) {
         NutritionistDto dto = new NutritionistDto();
+        dto.setId(nutritionist.getId());
         dto.setName(nutritionist.getName());
         dto.setPricePerMonth(nutritionist.getPricePerMonth());
         return dto;

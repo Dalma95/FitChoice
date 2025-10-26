@@ -1,8 +1,8 @@
 package com.FitChoice.FitChoice.controller;
 
+import com.FitChoice.FitChoice.model.dto.NutritionistCreateDto;
 import com.FitChoice.FitChoice.model.dto.NutritionistDto;
 import com.FitChoice.FitChoice.model.entity.Nutritionist;
-import com.FitChoice.FitChoice.repository.NutritionistRepository;
 import com.FitChoice.FitChoice.service.interfaceses.NutritionistService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/nutritionists")
@@ -21,7 +20,7 @@ public class NutritionistController {
 
     @Operation(summary = "Create nutritionist")
     @PostMapping
-    public ResponseEntity<Nutritionist> createNutritionist(@RequestBody NutritionistDto dto){
+    public ResponseEntity<Nutritionist> createNutritionist(@RequestBody NutritionistCreateDto dto){
         return ResponseEntity.ok(nutritionistService.createNutritionist(nutritionistService.toEntity(dto)));
     }
 
@@ -41,7 +40,7 @@ public class NutritionistController {
 
     @Operation(summary = "Update nutritionist")
     @PutMapping("/update/{id}")
-    public ResponseEntity<Nutritionist> updateNutritionist(@PathVariable Long id, @RequestBody NutritionistDto dto){
+    public ResponseEntity<Nutritionist> updateNutritionist(@PathVariable Long id, @RequestBody NutritionistCreateDto dto){
         return ResponseEntity.ok(nutritionistService.updateNutritionist(id, nutritionistService.toEntity(dto)));
     }
 

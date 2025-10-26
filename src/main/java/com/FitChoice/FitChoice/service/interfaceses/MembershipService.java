@@ -2,7 +2,6 @@ package com.FitChoice.FitChoice.service.interfaceses;
 
 import com.FitChoice.FitChoice.model.dto.MembershipCreateDto;
 import com.FitChoice.FitChoice.model.dto.MembershipDto;
-import com.FitChoice.FitChoice.model.dto.PaymentDto;
 import com.FitChoice.FitChoice.model.entity.Membership;
 
 import java.util.List;
@@ -28,5 +27,4 @@ public interface MembershipService {
 
     MembershipDto toDto (Membership membership);
 
-    Membership toEntityFromCreateDto(MembershipCreateDto dto);
 }

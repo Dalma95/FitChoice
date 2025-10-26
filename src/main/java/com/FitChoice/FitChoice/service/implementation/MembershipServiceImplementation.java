@@ -44,11 +44,17 @@ public class MembershipServiceImplementation implements MembershipService {
         membership.setEndDate(LocalDate.now().plusMonths(1));
 
 
-        switch (membership.getType()){
-            case GYM_PRO :
+        switch (membership.getType()) {
+            case GYM_PRO:
                 Trainer defaulTrainer = trainerRepository.findAll().stream().findFirst()
                         .orElseThrow(() -> new RuntimeException("No trainers available."));
                 membership.setTrainer(defaulTrainer);
+
+                if (dto.getNutritionistName() != null && !dto.getNutritionistName().isBlank()) {
+                    Nutritionist chosenNutritionist = nutritionistRepository.findNutritionistByNameIgnoreCase(dto.getNutritionistName())
+                            .orElseThrow(() -> new RuntimeException("Nutritionist not found."));
+                    membership.setNutritionist(chosenNutritionist);
+                }
                 break;
 
             case GYM_STAR:
@@ -75,13 +81,13 @@ public class MembershipServiceImplementation implements MembershipService {
                 break;
         }
 
-        if (dto.getFitnessClasses() != null && !dto.getFitnessClasses().isEmpty()){
+        if (dto.getFitnessClasses() != null && !dto.getFitnessClasses().isEmpty()) {
             Set<FitnessClass> fitnessClasses = dto.getFitnessClasses().stream()
                     .map(name -> fitnessClassRepository.findFitnessClassByNameIgnoreCase(name)
                             .orElseThrow(() -> new RuntimeException("Class not found ")))
                     .collect(Collectors.toSet());
             membership.setFitnessClasses(fitnessClasses);
-        }else {
+        } else {
             membership.setFitnessClasses(null);
         }
 
@@ -107,23 +113,23 @@ public class MembershipServiceImplementation implements MembershipService {
 
     @Override
     public Membership renewMembership(Long membershipId) {
-       Membership oldMembership = membershipRepository.findById(membershipId)
-               .orElseThrow(() -> new RuntimeException("Membership not found"));
+        Membership oldMembership = membershipRepository.findById(membershipId)
+                .orElseThrow(() -> new RuntimeException("Membership not found"));
 
-       Membership newMembership = new Membership();
-       newMembership.setClient(oldMembership.getClient());
-       newMembership.setTrainer(oldMembership.getTrainer());
-       newMembership.setNutritionist(oldMembership.getNutritionist());
+        Membership newMembership = new Membership();
+        newMembership.setClient(oldMembership.getClient());
+        newMembership.setTrainer(oldMembership.getTrainer());
+        newMembership.setNutritionist(oldMembership.getNutritionist());
         if (oldMembership.getFitnessClasses() != null) {
             newMembership.setFitnessClasses(new HashSet<>(oldMembership.getFitnessClasses()));
         }
-       newMembership.setType(oldMembership.getType());
-       newMembership.setPrice(oldMembership.getPrice());
-       newMembership.setStartDate(LocalDate.now());
-       newMembership.setEndDate(LocalDate.now().plusMonths(1));
-       newMembership.setStatus(MembershipStatus.INACTIVE);
+        newMembership.setType(oldMembership.getType());
+        newMembership.setPrice(oldMembership.getPrice());
+        newMembership.setStartDate(LocalDate.now());
+        newMembership.setEndDate(LocalDate.now().plusMonths(1));
+        newMembership.setStatus(MembershipStatus.INACTIVE);
 
-       double finalPrice = paymentService.calculateFinalPrice(newMembership);
+        double finalPrice = paymentService.calculateFinalPrice(newMembership);
 
         if (paymentService.isEligibleForDiscount(oldMembership.getClient(), oldMembership.getType())) {
             newMembership.setDiscountApplied(true);
@@ -136,8 +142,8 @@ public class MembershipServiceImplementation implements MembershipService {
         Payment payment = paymentService.createPaymentForMembership(newMembership, finalPrice);
         newMembership.setPayment(payment);
 
-       Membership savedNewMembership = membershipRepository.save(newMembership);
-       return savedNewMembership;
+        Membership savedNewMembership = membershipRepository.save(newMembership);
+        return savedNewMembership;
     }
 
     @Override
@@ -252,7 +258,7 @@ public class MembershipServiceImplementation implements MembershipService {
     }
 
     @Override
-    public Membership toEntity(MembershipDto dto){
+    public Membership toEntity(MembershipDto dto) {
         Membership membership = new Membership();
         membership.setPrice(dto.getPrice());
         membership.setStartDate(dto.getStartDate());
@@ -260,97 +266,6 @@ public class MembershipServiceImplementation implements MembershipService {
         membership.setType(dto.getType());
         membership.setStatus(dto.getStatus());
         membership.setDiscountApplied(dto.isDiscountApplied());
-
-        if(dto.getClientUserName() != null && !dto.getClientUserName().isBlank()){
-            Client client = clientRepository.findByUserNameIgnoreCase(dto.getClientUserName())
-                    .orElseGet(() -> {
-                        Client c = new Client();
-                        c.setUserName(dto.getClientUserName());
-                        return clientRepository.save(c);
-                    });
-            membership.setClient(client);
-        }
-        if(dto.getTrainerName() != null && !dto.getTrainerName().isBlank()){
-            Trainer trainer = trainerRepository.findTrainerByNameIgnoreCase(dto.getTrainerName())
-                    .orElseGet(() ->{
-                        Trainer t = new Trainer();
-                        t.setName(dto.getTrainerName());
-                        return trainerRepository.save(t);
-                    });
-            membership.setTrainer(trainer);
-        }
-        if(dto.getNutritionistName() != null && !dto.getNutritionistName().isBlank()){
-            Nutritionist nutritionist = nutritionistRepository.findNutritionistByNameIgnoreCase(dto.getNutritionistName())
-                    .orElseGet(() ->{
-                        Nutritionist n = new Nutritionist();
-                        n.setName(dto.getNutritionistName());
-                        return nutritionistRepository.save(n);
-                    });
-            membership.setNutritionist(nutritionist);
-        }
-        if (dto.getFitnessClasses() != null && !dto.getFitnessClasses().isEmpty()){
-            Set<FitnessClass> fitnessClasses = dto.getFitnessClasses().stream()
-                    .filter(n -> n!= null && !n.isBlank())
-                    .map(name -> fitnessClassRepository.findFitnessClassByNameIgnoreCase(name)
-                            .orElseGet(() ->{
-                                FitnessClass f = new FitnessClass();
-                                f.setName(name);
-                                return fitnessClassRepository.save(f);
-                            })
-                    ).collect(Collectors.toSet());
-            membership.setFitnessClasses(fitnessClasses);
-        }
-        if(dto.getFinalPrice() != null && dto.getPaymentDate() != null && dto.getPaymentStatus() != null){
-            Payment payment = new Payment();
-            payment.setClient(membership.getClient());
-            payment.setAmount(dto.getFinalPrice());
-            payment.setPaymentDate(dto.getPaymentDate());
-            payment.setStatus(dto.getPaymentStatus());
-            membership.setPayment(payment);
-        }
-        return membershipRepository.save(membership);
-    }
-
-    @Override
-    public MembershipDto toDto (Membership membership){
-        MembershipDto dto = new MembershipDto();
-        dto.setId(membership.getId());
-        dto.setPrice(membership.getPrice());
-        dto.setStartDate(membership.getStartDate());
-        dto.setEndDate(membership.getEndDate());
-        dto.setType(membership.getType());
-        dto.setStatus(membership.getStatus());
-        dto.setDiscountApplied(membership.isDiscountApplied());
-
-        if(membership.getClient() != null){
-            dto.setClientUserName(membership.getClient().getUserName());
-        }
-        if(membership.getTrainer() != null){
-            dto.setTrainerName(membership.getTrainer().getName());
-        }
-        if (membership.getNutritionist() != null){
-            dto.setNutritionistName(membership.getNutritionist().getName());
-        }
-        if(membership.getFitnessClasses() != null){
-            dto.setFitnessClasses(membership.getFitnessClasses().stream()
-                    .map(FitnessClass::getName)
-                    .collect(Collectors.toSet()));
-        }
-        if (membership.getPayment() != null){
-            dto.setFinalPrice(membership.getPayment().getAmount());
-            dto.setPaymentDate(membership.getPayment().getPaymentDate());
-            dto.setPaymentStatus(membership.getPayment().getStatus());
-        }
-        return dto;
-}
-
-    @Override
-    public Membership toEntityFromCreateDto(MembershipCreateDto dto) {
-        Membership membership = new Membership();
-
-        membership.setType(dto.getType());
-        membership.setStatus(MembershipStatus.INACTIVE);
-        membership.setDiscountApplied(false);
 
         if (dto.getClientUserName() != null && !dto.getClientUserName().isBlank()) {
             Client client = clientRepository.findByUserNameIgnoreCase(dto.getClientUserName())
@@ -361,7 +276,6 @@ public class MembershipServiceImplementation implements MembershipService {
                     });
             membership.setClient(client);
         }
-
         if (dto.getTrainerName() != null && !dto.getTrainerName().isBlank()) {
             Trainer trainer = trainerRepository.findTrainerByNameIgnoreCase(dto.getTrainerName())
                     .orElseGet(() -> {
@@ -371,7 +285,6 @@ public class MembershipServiceImplementation implements MembershipService {
                     });
             membership.setTrainer(trainer);
         }
-
         if (dto.getNutritionistName() != null && !dto.getNutritionistName().isBlank()) {
             Nutritionist nutritionist = nutritionistRepository.findNutritionistByNameIgnoreCase(dto.getNutritionistName())
                     .orElseGet(() -> {
@@ -381,7 +294,6 @@ public class MembershipServiceImplementation implements MembershipService {
                     });
             membership.setNutritionist(nutritionist);
         }
-
         if (dto.getFitnessClasses() != null && !dto.getFitnessClasses().isEmpty()) {
             Set<FitnessClass> fitnessClasses = dto.getFitnessClasses().stream()
                     .filter(n -> n != null && !n.isBlank())
@@ -394,10 +306,51 @@ public class MembershipServiceImplementation implements MembershipService {
                     ).collect(Collectors.toSet());
             membership.setFitnessClasses(fitnessClasses);
         }
-
+        if (dto.getFinalPrice() != null && dto.getPaymentDate() != null && dto.getPaymentStatus() != null) {
+            Payment payment = new Payment();
+            payment.setClient(membership.getClient());
+            payment.setAmount(dto.getFinalPrice());
+            payment.setPaymentDate(dto.getPaymentDate());
+            payment.setStatus(dto.getPaymentStatus());
+            membership.setPayment(payment);
+        }
         return membershipRepository.save(membership);
     }
+
+    @Override
+    public MembershipDto toDto(Membership membership) {
+        MembershipDto dto = new MembershipDto();
+        dto.setId(membership.getId());
+        dto.setPrice(membership.getPrice());
+        dto.setStartDate(membership.getStartDate());
+        dto.setEndDate(membership.getEndDate());
+        dto.setType(membership.getType());
+        dto.setStatus(membership.getStatus());
+        dto.setDiscountApplied(membership.isDiscountApplied());
+
+        if (membership.getClient() != null) {
+            dto.setClientUserName(membership.getClient().getUserName());
+        }
+        if (membership.getTrainer() != null) {
+            dto.setTrainerName(membership.getTrainer().getName());
+        }
+        if (membership.getNutritionist() != null) {
+            dto.setNutritionistName(membership.getNutritionist().getName());
+        }
+        if (membership.getFitnessClasses() != null) {
+            dto.setFitnessClasses(membership.getFitnessClasses().stream()
+                    .map(FitnessClass::getName)
+                    .collect(Collectors.toSet()));
+        }
+        if (membership.getPayment() != null) {
+            dto.setFinalPrice(membership.getPayment().getAmount());
+            dto.setPaymentDate(membership.getPayment().getPaymentDate());
+            dto.setPaymentStatus(membership.getPayment().getStatus());
+        }
+        return dto;
     }
+
+}
 
 
 

@@ -3,11 +3,8 @@ package com.FitChoice.FitChoice.model.dto;
 import lombok.Data;
 
 @Data
-public class TrainerDto {
+public class NutritionistCreateDto {
 
-    private Long id;
     private String name;
     private Double pricePerMonth;
-
-
 }

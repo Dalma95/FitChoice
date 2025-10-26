@@ -8,8 +8,6 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "trainers")
 public class Trainer {

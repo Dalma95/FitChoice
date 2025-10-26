@@ -11,8 +11,6 @@ import java.util.List;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "nutritionists")
 public class Nutritionist {

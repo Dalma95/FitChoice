@@ -5,7 +5,6 @@ import com.FitChoice.FitChoice.model.entity.Payment;
 import com.FitChoice.FitChoice.service.interfaceses.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 

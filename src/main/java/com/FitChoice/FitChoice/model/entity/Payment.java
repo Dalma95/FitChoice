@@ -12,8 +12,6 @@ import java.time.LocalDate;
 @Getter
 @ToString(exclude = "membership")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "payments")
 public class Payment {

@@ -1,5 +1,6 @@
 package com.FitChoice.FitChoice.service.interfaceses;
 
+import com.FitChoice.FitChoice.model.dto.NutritionistCreateDto;
 import com.FitChoice.FitChoice.model.dto.NutritionistDto;
 import com.FitChoice.FitChoice.model.entity.Nutritionist;
 
@@ -18,7 +19,7 @@ public interface NutritionistService {
 
     void deleteNutritionistById(Long id);
 
-    Nutritionist toEntity(NutritionistDto dto);
+    Nutritionist toEntity(NutritionistCreateDto dto);
 
     NutritionistDto toDto(Nutritionist nutritionist);
 }

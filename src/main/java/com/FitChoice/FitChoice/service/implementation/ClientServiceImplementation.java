@@ -7,7 +7,6 @@ import com.FitChoice.FitChoice.repository.ClientRepository;
 import com.FitChoice.FitChoice.service.interfaceses.ClientService;
 import com.FitChoice.FitChoice.service.interfaceses.MembershipService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -73,6 +72,7 @@ public class ClientServiceImplementation implements ClientService {
 
     public ClientResponseDto toResponseDto(Client client){
         ClientResponseDto dto = new ClientResponseDto();
+        dto.setId(client.getId());
         dto.setName(client.getUserName());
         dto.setEmail(client.getEmail());
 

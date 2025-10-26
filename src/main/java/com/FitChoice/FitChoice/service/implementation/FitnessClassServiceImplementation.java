@@ -1,5 +1,6 @@
 package com.FitChoice.FitChoice.service.implementation;
 
+import com.FitChoice.FitChoice.model.dto.FitnessClassCreateDto;
 import com.FitChoice.FitChoice.model.dto.FitnessClassDto;
 import com.FitChoice.FitChoice.model.entity.FitnessClass;
 import com.FitChoice.FitChoice.repository.FitnessClassRepository;
@@ -40,7 +41,6 @@ public class FitnessClassServiceImplementation implements FitnessClassService {
     public FitnessClass updateFitnessClass(Long id, FitnessClass fitnessClass) {
         FitnessClass fitnessClassFound = fitnessClassRepository.findById(id).orElseThrow(() -> new RuntimeException("Class not found" + id));
         fitnessClassFound.setName(fitnessClass.getName());
-        fitnessClassFound.setCapacity(fitnessClass.getCapacity());
         fitnessClassFound.setPrice(fitnessClass.getPrice());
         return fitnessClassRepository.save(fitnessClassFound);
     }
@@ -53,16 +53,15 @@ public class FitnessClassServiceImplementation implements FitnessClassService {
 
     public FitnessClassDto toDto(FitnessClass fitnessClass){
         FitnessClassDto dto = new FitnessClassDto();
+        dto.setId(fitnessClass.getId());
         dto.setName(fitnessClass.getName());
-        dto.setCapacity(fitnessClass.getCapacity());
         dto.setPrice(fitnessClass.getPrice());
         return dto;
     }
 
-    public FitnessClass toEntity(FitnessClassDto dto){
+    public FitnessClass toEntity(FitnessClassCreateDto dto){
         FitnessClass fitnessClass = new FitnessClass();
         fitnessClass.setName(dto.getName());
-        fitnessClass.setCapacity(dto.getCapacity());
         fitnessClass.setPrice(dto.getPrice());
         return fitnessClass;
     }

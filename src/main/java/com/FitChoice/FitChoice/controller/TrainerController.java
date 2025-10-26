@@ -1,5 +1,6 @@
 package com.FitChoice.FitChoice.controller;
 
+import com.FitChoice.FitChoice.model.dto.TrainerCreateDto;
 import com.FitChoice.FitChoice.model.dto.TrainerDto;
 import com.FitChoice.FitChoice.model.entity.Trainer;
 import com.FitChoice.FitChoice.service.interfaceses.TrainerService;
@@ -9,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/trainers")
@@ -20,7 +20,7 @@ public class TrainerController {
 
     @Operation(summary = "Create trainer")
     @PostMapping
-    public ResponseEntity<Trainer> createTrainer(TrainerDto dto){
+    public ResponseEntity<Trainer> createTrainer(TrainerCreateDto dto){
         return ResponseEntity.ok(trainerService.createTrainer(trainerService.toEntity(dto)));
     }
 
@@ -40,7 +40,7 @@ public class TrainerController {
 
     @Operation(summary = "Update trainer")
     @PutMapping("/update/{id}")
-    public ResponseEntity<Trainer> updateTrainer(@PathVariable Long id, @RequestBody TrainerDto dto){
+    public ResponseEntity<Trainer> updateTrainer(@PathVariable Long id, @RequestBody TrainerCreateDto dto){
         return ResponseEntity.ok(trainerService.updateTrainer(id, trainerService.toEntity(dto)));
     }
 

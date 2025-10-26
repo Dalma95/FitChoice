@@ -52,7 +52,6 @@ public class PaymentServiceImplementation implements PaymentService {
         updatedPayment.setPaymentDate(payment.getPaymentDate());
         paymentRepository.save(updatedPayment);
 
-        // Actualizăm și membership-ul
         Membership membership = updatedPayment.getMembership();
         if (payment.getStatus() == PaymentStatus.COMPLETED) {
             membership.setStatus(MembershipStatus.ACTIVE);
@@ -79,6 +78,9 @@ public class PaymentServiceImplementation implements PaymentService {
         switch (type) {
             case GYM_PRO:
                 total += trainerIncludedPrice;
+
+                if (membership.getNutritionist() != null && membership.getNutritionist().getPricePerMonth() != null)
+                    total += membership.getNutritionist().getPricePerMonth();
                 break;
 
             case GYM_STAR:
@@ -87,7 +89,6 @@ public class PaymentServiceImplementation implements PaymentService {
 
             case FULLFITNESS:
             default:
-                // FULLFITNESS nu include nimic; se adaugă doar dacă userul a ales manual
                 if (membership.getTrainer() != null && membership.getTrainer().getPricePerMonth() != null)
                     total += membership.getTrainer().getPricePerMonth();
 

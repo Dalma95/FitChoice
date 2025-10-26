@@ -57,6 +57,7 @@ class MembershipServiceTest {
         dto.setType(MembershipType.FULLFITNESS);
 
         when(clientRepository.findByUserNameIgnoreCase("testUser")).thenReturn(Optional.of(client));
+        when(paymentService.calculateFinalPrice(any(Membership.class))).thenReturn(150.0); // ✅ adaugă asta
         when(paymentService.isEligibleForDiscount(any(), any())).thenReturn(false);
         when(paymentService.createPaymentForMembership(any(), anyDouble())).thenReturn(payment);
         when(membershipRepository.save(any(Membership.class))).thenAnswer(invocation -> invocation.getArgument(0));

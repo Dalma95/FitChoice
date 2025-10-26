@@ -1,5 +1,6 @@
 package com.FitChoice.FitChoice.service.implementation;
 
+import com.FitChoice.FitChoice.model.dto.TrainerCreateDto;
 import com.FitChoice.FitChoice.model.dto.TrainerDto;
 import com.FitChoice.FitChoice.model.entity.Trainer;
 import com.FitChoice.FitChoice.repository.TrainerRepository;
@@ -50,7 +51,7 @@ public class TrainerServiceImplementation implements TrainerService {
     }
 
     @Override
-    public Trainer toEntity(TrainerDto dto) {
+    public Trainer toEntity(TrainerCreateDto dto) {
         Trainer trainer = new Trainer();
         trainer.setName(dto.getName());
         trainer.setPricePerMonth(dto.getPricePerMonth());
@@ -60,6 +61,7 @@ public class TrainerServiceImplementation implements TrainerService {
     @Override
     public TrainerDto toDto(Trainer trainer) {
         TrainerDto dto = new TrainerDto();
+        dto.setId(trainer.getId());
         dto.setName(trainer.getName());
         dto.setPricePerMonth(trainer.getPricePerMonth());
         return dto;

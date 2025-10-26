@@ -26,13 +26,13 @@ class FitnessClassControllerIntegrationTest {
     @Test
     @DisplayName("Should create and retrieve FitnessClass via REST API")
     void testCreateAndGetFitnessClass() throws Exception {
-        // given
+
         FitnessClassDto dto = new FitnessClassDto();
         dto.setName("Pilates");
         dto.setCapacity(10);
         dto.setPrice(59.99);
 
-        // when - create via POST
+
         mockMvc.perform(post("/api/fitnessClasses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
@@ -41,7 +41,7 @@ class FitnessClassControllerIntegrationTest {
                 .andExpect(jsonPath("$.capacity").value(10))
                 .andExpect(jsonPath("$.price").value(59.99));
 
-        // then - check via GET all
+
         mockMvc.perform(get("/api/fitnessClasses"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Pilates"))

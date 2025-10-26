@@ -1,5 +1,6 @@
 package com.FitChoice.FitChoice.service.interfaceses;
 
+import com.FitChoice.FitChoice.model.dto.FitnessClassCreateDto;
 import com.FitChoice.FitChoice.model.dto.FitnessClassDto;
 import com.FitChoice.FitChoice.model.entity.FitnessClass;
 
@@ -20,5 +21,5 @@ public interface FitnessClassService {
 
     FitnessClassDto toDto (FitnessClass fitnessClass);
 
-    FitnessClass toEntity(FitnessClassDto dto);
+    FitnessClass toEntity(FitnessClassCreateDto dto);
 }

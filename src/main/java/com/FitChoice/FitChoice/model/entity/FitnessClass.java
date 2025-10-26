@@ -9,8 +9,6 @@ import java.util.Set;
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@AllArgsConstructor
-@NoArgsConstructor
 @ToString(exclude = {"memberships"})
 @Entity
 @Table(name = "fitness_classes")
@@ -22,7 +20,6 @@ public class FitnessClass {
     private Long id;
 
     private String name;
-    private Integer capacity;
     private Double price;
 
     @ManyToMany(mappedBy = "fitnessClasses", fetch = FetchType.LAZY)

@@ -1,5 +1,6 @@
 package com.FitChoice.FitChoice.service.interfaceses;
 
+import com.FitChoice.FitChoice.model.dto.TrainerCreateDto;
 import com.FitChoice.FitChoice.model.dto.TrainerDto;
 import com.FitChoice.FitChoice.model.entity.Trainer;
 
@@ -18,7 +19,7 @@ public interface TrainerService {
 
     Trainer updateTrainer(Long id, Trainer trainer);
 
-    Trainer toEntity (TrainerDto dto);
+    Trainer toEntity (TrainerCreateDto dto);
 
     TrainerDto toDto(Trainer trainer);
 }

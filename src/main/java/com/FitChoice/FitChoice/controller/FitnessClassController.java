@@ -1,5 +1,6 @@
 package com.FitChoice.FitChoice.controller;
 
+import com.FitChoice.FitChoice.model.dto.FitnessClassCreateDto;
 import com.FitChoice.FitChoice.model.dto.FitnessClassDto;
 import com.FitChoice.FitChoice.model.entity.FitnessClass;
 import com.FitChoice.FitChoice.service.interfaceses.FitnessClassService;
@@ -19,7 +20,7 @@ public class FitnessClassController {
 
     @Operation(summary = "Create fitness class")
     @PostMapping
-    public ResponseEntity<FitnessClass> createFitnessClass(@RequestBody FitnessClassDto dto){
+    public ResponseEntity<FitnessClass> createFitnessClass(@RequestBody FitnessClassCreateDto dto){
         return ResponseEntity.ok(fitnessClassService.createFitnessClass(fitnessClassService.toEntity(dto)));
     }
 
@@ -39,7 +40,7 @@ public class FitnessClassController {
 
     @Operation(summary = "Update fitness class")
     @PutMapping("/{id}")
-    public ResponseEntity<FitnessClass> updateFitnessClass(@PathVariable Long id, @RequestBody FitnessClassDto dto){
+    public ResponseEntity<FitnessClass> updateFitnessClass(@PathVariable Long id, @RequestBody FitnessClassCreateDto dto){
         return ResponseEntity.ok(fitnessClassService.updateFitnessClass(id, fitnessClassService.toEntity(dto)));
     }
 
